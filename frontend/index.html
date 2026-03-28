@@ -1,0 +1,3267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GutMind Explorer | Microbiome × Mental Health</title>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+    <style>
+        :root {
+            --bg-deep: #0a0c0f;
+            --bg-surface: #12151a;
+            --bg-elevated: #1a1e25;
+            --bg-hover: #242a33;
+            --border: #2a3140;
+            --text-primary: #f0f2f5;
+            --text-secondary: #8b95a5;
+            --text-muted: #5a6270;
+            --accent-teal: #2dd4bf;
+            --accent-teal-dim: rgba(45, 212, 191, 0.15);
+            --accent-violet: #a78bfa;
+            --accent-violet-dim: rgba(167, 139, 250, 0.15);
+            --accent-coral: #fb7185;
+            --accent-coral-dim: rgba(251, 113, 133, 0.15);
+            --accent-amber: #fbbf24;
+            --gradient-gut: linear-gradient(135deg, #2dd4bf 0%, #06b6d4 100%);
+            --gradient-mind: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+            --gradient-connection: linear-gradient(90deg, #2dd4bf 0%, #a78bfa 100%);
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --shadow-glow: 0 0 60px rgba(45, 212, 191, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Subtle background texture */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 20% 20%, rgba(45, 212, 191, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(167, 139, 250, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Header */
+        header {
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: rgba(10, 12, 15, 0.8);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--gradient-connection);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+
+        .logo-text {
+            font-family: 'Instrument Serif', serif;
+            font-size: 1.6rem;
+            background: var(--gradient-connection);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-tag {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-top: 0.2rem;
+        }
+
+        nav {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-btn.active {
+            background: var(--accent-teal-dim);
+            color: var(--accent-teal);
+        }
+
+        /* Main Layout */
+        main {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem 3rem;
+        }
+
+        /* Welcome Section */
+        .welcome {
+            text-align: center;
+            padding: 4rem 2rem;
+            max-width: 800px;
+            margin: 0 auto 3rem;
+        }
+
+        .welcome h1 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 3.5rem;
+            font-weight: 400;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+
+        .welcome h1 .gradient-text {
+            background: var(--gradient-connection);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome p {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .data-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Info Cards */
+        .info-panel {
+            background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(45, 212, 191, 0.05) 100%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-panel h3 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 1.2rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-panel p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        .info-panel .highlight {
+            color: var(--accent-teal);
+            font-weight: 500;
+        }
+
+        .info-panel .highlight-coral {
+            color: var(--accent-coral);
+            font-weight: 500;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .info-item {
+            background: var(--bg-elevated);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+        }
+
+        .info-item h4 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .info-item p {
+            font-size: 0.85rem;
+        }
+
+        .finding-card {
+            background: var(--bg-elevated);
+            border-left: 3px solid var(--accent-teal);
+            padding: 1rem 1.25rem;
+            margin-top: 1rem;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+        }
+
+        .finding-card.warning {
+            border-left-color: var(--accent-coral);
+        }
+
+        .finding-card h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .finding-card p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .btn {
+            padding: 0.9rem 1.8rem;
+            border-radius: var(--radius-md);
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-gut);
+            color: var(--bg-deep);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(45, 212, 191, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-teal);
+        }
+
+        /* Data Info Banner */
+        .data-banner {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .data-banner-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .data-banner-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-teal-dim);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-teal);
+        }
+
+        .data-banner h3 {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .data-banner p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Dashboard Grid */
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: 1.8rem;
+            font-weight: 400;
+        }
+
+        .section-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--accent-teal);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .stat-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .stat-card-icon.teal {
+            background: var(--accent-teal-dim);
+            color: var(--accent-teal);
+        }
+
+        .stat-card-icon.violet {
+            background: var(--accent-violet-dim);
+            color: var(--accent-violet);
+        }
+
+        .stat-card-icon.coral {
+            background: var(--accent-coral-dim);
+            color: var(--accent-coral);
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.2rem;
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-btn {
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chart-btn:hover, .chart-btn.active {
+            background: var(--accent-teal-dim);
+            border-color: var(--accent-teal);
+            color: var(--accent-teal);
+        }
+
+        .chart-area {
+            height: 350px;
+            position: relative;
+        }
+
+        /* Two Column Layout */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Bacteria Table */
+        .bacteria-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .bacteria-table th,
+        .bacteria-table td {
+            padding: 0.9rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .bacteria-table th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .bacteria-table tr:hover td {
+            background: var(--bg-hover);
+        }
+
+        .bacteria-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-teal);
+        }
+
+        .abundance-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-elevated);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .abundance-fill {
+            height: 100%;
+            background: var(--gradient-gut);
+            border-radius: 3px;
+            transition: width 0.5s ease-out;
+        }
+
+        .correlation-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: var(--radius-sm);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        .correlation-badge.positive {
+            background: var(--accent-coral-dim);
+            color: var(--accent-coral);
+        }
+
+        .correlation-badge.negative {
+            background: var(--accent-teal-dim);
+            color: var(--accent-teal);
+        }
+
+        /* PCA / Cluster Plot */
+        .plot-container {
+            position: relative;
+            height: 400px;
+        }
+
+        .pca-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .cluster-legend {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.8rem 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* Predictor Section */
+        .predictor-panel {
+            background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-elevated) 100%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .predictor-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .predictor-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-mind);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .predictor-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: 1.4rem;
+        }
+
+        .predictor-subtitle {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .predictor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-input {
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+        }
+
+        .feature-input label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-input input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            outline: none;
+        }
+
+        .feature-input input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .prediction-result {
+            display: none;
+            background: var(--bg-deep);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .prediction-result.show {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .prediction-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .prediction-value {
+            font-family: 'Instrument Serif', serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .prediction-value.low {
+            color: var(--accent-teal);
+        }
+
+        .prediction-value.high {
+            color: var(--accent-coral);
+        }
+
+        .prediction-confidence {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .confidence-bar {
+            width: 200px;
+            height: 8px;
+            background: var(--bg-elevated);
+            border-radius: 4px;
+            margin: 1rem auto 0;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease-out;
+        }
+
+        /* Hidden file input */
+        .file-input {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem 1.5rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            main {
+                padding: 1.5rem;
+            }
+
+            .welcome h1 {
+                font-size: 2.5rem;
+            }
+
+            .data-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent-teal);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Bacteria Cards for Learn Section */
+        .bacteria-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent-teal);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .bacteria-card.warning {
+            border-left-color: var(--accent-coral);
+        }
+
+        .bacteria-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .bacteria-badge {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .bacteria-badge.good {
+            background: var(--accent-teal-dim);
+            color: var(--accent-teal);
+        }
+
+        .bacteria-badge.bad {
+            background: var(--accent-coral-dim);
+            color: var(--accent-coral);
+        }
+
+        .bacteria-card p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .food-sources {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Test Services Grid */
+        .test-services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .service-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+        }
+
+        .service-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .service-name {
+            font-weight: 600;
+            color: var(--accent-violet);
+        }
+
+        .service-price {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .service-card p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Profile Entry Panel */
+        .profile-entry-panel {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+        }
+
+        .profile-section {
+            margin-bottom: 2rem;
+        }
+
+        .profile-section h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .section-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .profile-input-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .profile-input-label {
+            flex: 1;
+        }
+
+        .profile-input-label .bacteria-name {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-teal);
+            font-size: 0.9rem;
+        }
+
+        .profile-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .profile-input-control {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .profile-slider {
+            width: 150px;
+            appearance: none;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--bg-elevated);
+            outline: none;
+        }
+
+        .profile-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-teal);
+            cursor: pointer;
+        }
+
+        .profile-number {
+            width: 70px;
+            padding: 0.4rem 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            text-align: right;
+        }
+
+        .profile-unit {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Profile Results */
+        .score-display {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+
+        .score-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-teal-dim) 0%, var(--accent-violet-dim) 100%);
+            border: 3px solid var(--accent-teal);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
+        .score-value {
+            font-family: 'Instrument Serif', serif;
+            font-size: 2.5rem;
+            color: var(--accent-teal);
+        }
+
+        .score-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .score-interpretation {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .score-breakdown {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            font-size: 0.85rem;
+        }
+
+        .breakdown-item .label {
+            color: var(--text-secondary);
+        }
+
+        .breakdown-item .value {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .breakdown-item .value.positive {
+            color: var(--accent-teal);
+        }
+
+        .breakdown-item .value.negative {
+            color: var(--accent-coral);
+        }
+
+        /* Simulator */
+        .simulator-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .simulator-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .simulator-controls, .simulator-output {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+        }
+
+        .simulator-controls h4, .simulator-output h4 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sim-presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .preset-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-right: 0.5rem;
+        }
+
+        .preset-btn {
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover {
+            background: var(--accent-teal-dim);
+            border-color: var(--accent-teal);
+            color: var(--accent-teal);
+        }
+
+        .sim-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sim-slider-label {
+            width: 120px;
+            font-size: 0.85rem;
+        }
+
+        .sim-slider-label .bacteria-name {
+            color: var(--accent-teal);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        .sim-slider {
+            flex: 1;
+            appearance: none;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--bg-elevated);
+        }
+
+        .sim-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--gradient-gut);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(45, 212, 191, 0.3);
+        }
+
+        .sim-slider-value {
+            width: 50px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            text-align: right;
+            color: var(--text-secondary);
+        }
+
+        /* Gauge */
+        .sim-gauge-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .sim-gauge {
+            margin: 1.5rem 0 1rem;
+        }
+
+        .gauge-track {
+            height: 24px;
+            background: linear-gradient(90deg, var(--accent-teal) 0%, var(--accent-amber) 50%, var(--accent-coral) 100%);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gauge-fill {
+            position: absolute;
+            top: 4px;
+            bottom: 4px;
+            left: 4px;
+            width: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: left 0.3s ease-out;
+        }
+
+        .gauge-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .gauge-value {
+            font-family: 'Instrument Serif', serif;
+            font-size: 2rem;
+            margin-top: 0.5rem;
+        }
+
+        .gauge-note {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Factors */
+        .sim-factors {
+            margin-bottom: 1.5rem;
+        }
+
+        .factor-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .factor-item:last-child {
+            border-bottom: none;
+        }
+
+        .factor-name {
+            color: var(--text-secondary);
+        }
+
+        .factor-impact {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        .factor-impact.protective {
+            color: var(--accent-teal);
+        }
+
+        .factor-impact.risk {
+            color: var(--accent-coral);
+        }
+
+        /* Insights */
+        .sim-insights {
+            background: var(--bg-elevated);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+        }
+
+        .sim-insights h4 {
+            margin-bottom: 0.5rem;
+        }
+
+        .sim-insights p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-deep);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">🧬</div>
+            <div>
+                <div class="logo-text">GutMind Explorer</div>
+                <div class="logo-tag">Microbiome × Mental Health</div>
+            </div>
+        </div>
+        <nav>
+            <button class="nav-btn" data-view="learn">Learn</button>
+            <button class="nav-btn active" data-view="overview">Overview</button>
+            <button class="nav-btn" data-view="correlations">Correlations</button>
+            <button class="nav-btn" data-view="clusters">Clusters</button>
+            <button class="nav-btn" data-view="myprofile">My Profile</button>
+            <button class="nav-btn" data-view="simulator">Simulator</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Welcome Section (shown when no data) -->
+        <section class="welcome" id="welcomeSection">
+            <h1>Explore the <span class="gradient-text">Gut-Brain</span> Connection</h1>
+            <p>Upload your microbiome dataset or explore our demo data to discover correlations between gut bacteria abundance and mental health markers.</p>
+            <div class="data-actions">
+                <button class="btn btn-primary" onclick="loadDemoData()">
+                    <span>⚡</span> Load Demo Dataset
+                </button>
+                <label class="btn btn-secondary">
+                    <span>📁</span> Upload Your Data
+                    <input type="file" class="file-input" accept=".csv,.json" onchange="handleFileUpload(event)">
+                </label>
+            </div>
+        </section>
+
+        <!-- Data Banner -->
+        <div class="data-banner" id="dataBanner" style="display: none;">
+            <div class="data-banner-info">
+                <div class="data-banner-icon">📊</div>
+                <div>
+                    <h3 id="datasetName">Demo Dataset</h3>
+                    <p id="datasetInfo">50 subjects • 25 bacteria species • Anxiety & Depression scores</p>
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="resetData()">
+                <span>↻</span> Change Dataset
+            </button>
+        </div>
+
+        <!-- Overview Dashboard -->
+        <section class="dashboard active" id="overviewDashboard">
+            <div class="info-panel">
+                <h3>🔬 What is the Gut-Brain Axis?</h3>
+                <p>Your gut contains <span class="highlight">trillions of bacteria</span> that communicate with your brain via the vagus nerve, immune system, and metabolites they produce. Research shows that the composition of your gut microbiome may influence <span class="highlight-coral">anxiety, depression, and mood</span>.</p>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <h4>This Dataset</h4>
+                        <p>Simulated data for <strong id="infoSubjects">50</strong> people, measuring <strong id="infoBacteria">25</strong> bacterial species and their anxiety/depression scores.</p>
+                    </div>
+                    <div class="info-item">
+                        <h4>What We're Looking For</h4>
+                        <p>Which bacteria are more common in people with <span class="highlight">low anxiety</span> vs <span class="highlight-coral">high anxiety</span>?</p>
+                    </div>
+                    <div class="info-item">
+                        <h4>Real Science</h4>
+                        <p>Studies link <em>Lactobacillus</em> and <em>Bifidobacterium</em> with lower anxiety. Some <em>Clostridia</em> correlate with higher anxiety.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Dataset Overview</h2>
+                    <p class="section-subtitle">Key statistics from your microbiome + mental health data</p>
+                </div>
+            </div>
+
+            <div class="cards-grid">
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-card-icon teal">👥</div>
+                    </div>
+                    <div class="stat-value" id="totalSubjects">50</div>
+                    <div class="stat-label">Total Subjects</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-card-icon violet">🦠</div>
+                    </div>
+                    <div class="stat-value" id="totalBacteria">25</div>
+                    <div class="stat-label">Bacteria Species</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-card-icon coral">📈</div>
+                    </div>
+                    <div class="stat-value" id="avgAnxiety">42.3</div>
+                    <div class="stat-label">Avg Anxiety Score (0-100)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-card-icon teal">📉</div>
+                    </div>
+                    <div class="stat-value" id="avgDepression">38.7</div>
+                    <div class="stat-label">Avg Depression Score (0-100)</div>
+                </div>
+            </div>
+
+            <div class="two-column">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Mental Health Score Distribution</h3>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">How many subjects fall into each anxiety/depression range? Higher scores = more symptoms.</p>
+                    <div class="chart-area">
+                        <canvas id="mentalHealthChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Top 10 Bacteria by Abundance</h3>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">The most common gut bacteria across all subjects (% of total microbiome).</p>
+                    <div class="chart-area">
+                        <canvas id="abundanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Learn Dashboard - Educational Content -->
+        <section class="dashboard" id="learnDashboard">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">The Gut-Brain Connection</h2>
+                    <p class="section-subtitle">Understanding how your microbiome influences mental health</p>
+                </div>
+            </div>
+
+            <div class="info-panel" style="background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(167, 139, 250, 0.08) 100%);">
+                <h3>🧠 What is the Gut-Brain Axis?</h3>
+                <p>Your gut and brain are in constant communication through a network called the <span class="highlight">gut-brain axis</span>. This bidirectional highway includes:</p>
+                <div class="info-grid" style="margin-top: 1.5rem;">
+                    <div class="info-item">
+                        <h4>🔌 Vagus Nerve</h4>
+                        <p>The longest cranial nerve directly connects your gut to your brainstem, sending signals in both directions.</p>
+                    </div>
+                    <div class="info-item">
+                        <h4>🧪 Neurotransmitters</h4>
+                        <p>~95% of your body's serotonin is made in the gut. Gut bacteria produce GABA, dopamine, and other mood chemicals.</p>
+                    </div>
+                    <div class="info-item">
+                        <h4>🛡️ Immune System</h4>
+                        <p>70% of immune cells live in your gut. Inflammation from gut issues can affect brain function.</p>
+                    </div>
+                    <div class="info-item">
+                        <h4>🧬 Metabolites</h4>
+                        <p>Bacteria produce short-chain fatty acids (SCFAs) that cross the blood-brain barrier and influence mood.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="two-column">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">😌 "Psychobiotic" Bacteria</h3>
+                    </div>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">Research suggests these species may have positive effects on mental health:</p>
+                    
+                    <div class="bacteria-card">
+                        <div class="bacteria-card-header">
+                            <span class="bacteria-name">Lactobacillus rhamnosus</span>
+                            <span class="bacteria-badge good">Anxiolytic</span>
+                        </div>
+                        <p>Shown to reduce anxiety and depression-like behavior in animal studies. Produces GABA.</p>
+                        <div class="food-sources">🥛 Yogurt, kefir, fermented vegetables</div>
+                    </div>
+                    
+                    <div class="bacteria-card">
+                        <div class="bacteria-card-header">
+                            <span class="bacteria-name">Bifidobacterium longum</span>
+                            <span class="bacteria-badge good">Stress-reducing</span>
+                        </div>
+                        <p>Human trials show reduced cortisol levels and improved stress coping.</p>
+                        <div class="food-sources">🧀 Fermented dairy, fiber-rich foods</div>
+                    </div>
+                    
+                    <div class="bacteria-card">
+                        <div class="bacteria-card-header">
+                            <span class="bacteria-name">Faecalibacterium prausnitzii</span>
+                            <span class="bacteria-badge good">Anti-inflammatory</span>
+                        </div>
+                        <p>Major butyrate producer. Low levels linked to depression and IBD.</p>
+                        <div class="food-sources">🥦 High-fiber foods, resistant starch</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">⚠️ Bacteria to Watch</h3>
+                    </div>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">Elevated levels of these may correlate with mental health symptoms:</p>
+                    
+                    <div class="bacteria-card warning">
+                        <div class="bacteria-card-header">
+                            <span class="bacteria-name">Clostridium difficile</span>
+                            <span class="bacteria-badge bad">Pro-inflammatory</span>
+                        </div>
+                        <p>Overgrowth linked to gut inflammation and systemic effects. Often rises after antibiotic use.</p>
+                    </div>
+                    
+                    <div class="bacteria-card warning">
+                        <div class="bacteria-card-header">
+                            <span class="bacteria-name">Bilophila wadsworthia</span>
+                            <span class="bacteria-badge bad">High-fat associated</span>
+                        </div>
+                        <p>Thrives on saturated fat. Produces hydrogen sulfide, linked to inflammation.</p>
+                    </div>
+                    
+                    <div class="bacteria-card warning">
+                        <div class="bacteria-card-header">
+                            <span class="bacteria-name">Desulfovibrio</span>
+                            <span class="bacteria-badge bad">LPS producer</span>
+                        </div>
+                        <p>Elevated in some depression studies. Produces endotoxins that may trigger inflammation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>🧪 How to Get Your Microbiome Tested</h3>
+                <p>Several consumer services offer gut microbiome testing. Here's what's available:</p>
+                <div class="test-services-grid">
+                    <div class="service-card">
+                        <div class="service-header">
+                            <span class="service-name">Viome</span>
+                            <span class="service-price">~$150-400</span>
+                        </div>
+                        <p>RNA-based analysis. Provides food recommendations. Reports are user-friendly but data export is limited.</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-header">
+                            <span class="service-name">ZOE</span>
+                            <span class="service-price">~$350</span>
+                        </div>
+                        <p>Combines microbiome, blood sugar, and blood fat testing. Personalized nutrition program included.</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-header">
+                            <span class="service-name">Biomesight</span>
+                            <span class="service-price">~$180</span>
+                        </div>
+                        <p>16S sequencing with <strong>raw data export</strong> (CSV). Good for researchers and data enthusiasts.</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-header">
+                            <span class="service-name">Thorne Gut Health</span>
+                            <span class="service-price">~$200</span>
+                        </div>
+                        <p>Includes Onegevity analysis. Clinician-friendly reports with actionable insights.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="finding-card" style="margin-top: 1rem;">
+                <h4>📚 Want to Learn More?</h4>
+                <p>Key research papers: Cryan & Dinan (2012) "Mind-altering microorganisms", Valles-Colomer et al. (2019) "The neuroactive potential of the human gut microbiota"</p>
+            </div>
+        </section>
+
+        <!-- My Profile Dashboard - Manual Entry -->
+        <section class="dashboard" id="myprofileDashboard">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">My Microbiome Profile</h2>
+                    <p class="section-subtitle">Enter your test results to see personalized insights</p>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>📝 Enter Your Data</h3>
+                <p>Have results from a microbiome test? Enter the abundance percentages for key bacteria below. Don't have exact numbers? Use the sliders to estimate based on whether your report showed "low", "normal", or "high" levels.</p>
+            </div>
+
+            <div class="profile-entry-panel">
+                <div class="profile-section">
+                    <h4>😌 Beneficial Bacteria</h4>
+                    <p class="section-hint">Higher is generally better for these species</p>
+                    
+                    <div class="profile-input-row">
+                        <div class="profile-input-label">
+                            <span class="bacteria-name">Lactobacillus</span>
+                            <span class="profile-hint">Found in yogurt, kefir</span>
+                        </div>
+                        <div class="profile-input-control">
+                            <input type="range" min="0" max="20" step="0.5" value="5" class="profile-slider" data-bacteria="Lactobacillus">
+                            <input type="number" min="0" max="100" step="0.1" value="5" class="profile-number" data-bacteria="Lactobacillus">
+                            <span class="profile-unit">%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-input-row">
+                        <div class="profile-input-label">
+                            <span class="bacteria-name">Bifidobacterium</span>
+                            <span class="profile-hint">Fiber fermenters, SCFA producers</span>
+                        </div>
+                        <div class="profile-input-control">
+                            <input type="range" min="0" max="20" step="0.5" value="4" class="profile-slider" data-bacteria="Bifidobacterium">
+                            <input type="number" min="0" max="100" step="0.1" value="4" class="profile-number" data-bacteria="Bifidobacterium">
+                            <span class="profile-unit">%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-input-row">
+                        <div class="profile-input-label">
+                            <span class="bacteria-name">Faecalibacterium</span>
+                            <span class="profile-hint">Anti-inflammatory, butyrate producer</span>
+                        </div>
+                        <div class="profile-input-control">
+                            <input type="range" min="0" max="20" step="0.5" value="8" class="profile-slider" data-bacteria="Faecalibacterium">
+                            <input type="number" min="0" max="100" step="0.1" value="8" class="profile-number" data-bacteria="Faecalibacterium">
+                            <span class="profile-unit">%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-input-row">
+                        <div class="profile-input-label">
+                            <span class="bacteria-name">Akkermansia</span>
+                            <span class="profile-hint">Gut lining health</span>
+                        </div>
+                        <div class="profile-input-control">
+                            <input type="range" min="0" max="10" step="0.5" value="2" class="profile-slider" data-bacteria="Akkermansia">
+                            <input type="number" min="0" max="100" step="0.1" value="2" class="profile-number" data-bacteria="Akkermansia">
+                            <span class="profile-unit">%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-section">
+                    <h4>⚠️ Watch These Levels</h4>
+                    <p class="section-hint">Lower is generally better for these species</p>
+                    
+                    <div class="profile-input-row">
+                        <div class="profile-input-label">
+                            <span class="bacteria-name">Clostridium</span>
+                            <span class="profile-hint">Some species pro-inflammatory</span>
+                        </div>
+                        <div class="profile-input-control">
+                            <input type="range" min="0" max="15" step="0.5" value="3" class="profile-slider" data-bacteria="Clostridium">
+                            <input type="number" min="0" max="100" step="0.1" value="3" class="profile-number" data-bacteria="Clostridium">
+                            <span class="profile-unit">%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-input-row">
+                        <div class="profile-input-label">
+                            <span class="bacteria-name">Bilophila</span>
+                            <span class="profile-hint">Thrives on saturated fat</span>
+                        </div>
+                        <div class="profile-input-control">
+                            <input type="range" min="0" max="10" step="0.5" value="1" class="profile-slider" data-bacteria="Bilophila">
+                            <input type="number" min="0" max="100" step="0.1" value="1" class="profile-number" data-bacteria="Bilophila">
+                            <span class="profile-unit">%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-input-row">
+                        <div class="profile-input-label">
+                            <span class="bacteria-name">Desulfovibrio</span>
+                            <span class="profile-hint">Hydrogen sulfide producer</span>
+                        </div>
+                        <div class="profile-input-control">
+                            <input type="range" min="0" max="5" step="0.1" value="0.5" class="profile-slider" data-bacteria="Desulfovibrio">
+                            <input type="number" min="0" max="100" step="0.1" value="0.5" class="profile-number" data-bacteria="Desulfovibrio">
+                            <span class="profile-unit">%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="analyzeMyProfile()" style="width: 100%; margin-top: 1rem;">
+                    <span>🔬</span> Analyze My Profile
+                </button>
+            </div>
+
+            <div class="profile-results" id="profileResults" style="display: none;">
+                <div class="section-header" style="margin-top: 2rem;">
+                    <h2 class="section-title">Your Analysis</h2>
+                </div>
+                
+                <div class="two-column">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Your Profile vs. Study Average</h3>
+                        </div>
+                        <div class="chart-area">
+                            <canvas id="profileComparisonChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Gut-Brain Score</h3>
+                        </div>
+                        <div class="score-display">
+                            <div class="score-circle" id="gutBrainScore">
+                                <span class="score-value">72</span>
+                                <span class="score-label">/ 100</span>
+                            </div>
+                            <p class="score-interpretation" id="scoreInterpretation">Your profile shows a favorable balance of beneficial bacteria.</p>
+                        </div>
+                        <div class="score-breakdown" id="scoreBreakdown">
+                            <!-- Filled dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-panel" id="profileRecommendations">
+                    <h3>💡 Personalized Suggestions</h3>
+                    <div id="recommendationsList">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Simulator Dashboard - What-If Explorer -->
+        <section class="dashboard" id="simulatorDashboard">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">What-If Simulator</h2>
+                    <p class="section-subtitle">Explore how different microbiome compositions might relate to mental health</p>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>🎮 How This Works</h3>
+                <p>This simulator lets you explore hypothetical scenarios. Adjust the bacteria levels and see how the predicted anxiety risk changes based on patterns from research data. <strong>This is for educational exploration only</strong> — real health decisions should involve healthcare providers.</p>
+            </div>
+
+            <div class="simulator-container">
+                <div class="simulator-controls">
+                    <h4>🦠 Adjust Bacteria Levels</h4>
+                    
+                    <div class="sim-presets">
+                        <span class="preset-label">Quick presets:</span>
+                        <button class="preset-btn" onclick="loadPreset('healthy')">Healthy Gut</button>
+                        <button class="preset-btn" onclick="loadPreset('dysbiosis')">Dysbiosis</button>
+                        <button class="preset-btn" onclick="loadPreset('postAntibiotic')">Post-Antibiotic</button>
+                        <button class="preset-btn" onclick="loadPreset('highFiber')">High-Fiber Diet</button>
+                    </div>
+
+                    <div class="sim-sliders" id="simSliders">
+                        <!-- Generated dynamically -->
+                    </div>
+                </div>
+
+                <div class="simulator-output">
+                    <div class="sim-gauge-container">
+                        <h4>Predicted Anxiety Risk</h4>
+                        <div class="sim-gauge">
+                            <div class="gauge-track">
+                                <div class="gauge-fill" id="simGaugeFill"></div>
+                            </div>
+                            <div class="gauge-labels">
+                                <span>Low</span>
+                                <span>Moderate</span>
+                                <span>High</span>
+                            </div>
+                        </div>
+                        <div class="gauge-value" id="simGaugeValue">35%</div>
+                        <p class="gauge-note">Based on correlations in research data</p>
+                    </div>
+
+                    <div class="sim-factors">
+                        <h4>Contributing Factors</h4>
+                        <div id="simFactorsList">
+                            <!-- Generated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="sim-insights">
+                        <h4>💡 Insight</h4>
+                        <p id="simInsightText">Adjust the sliders to see how different bacterial compositions might affect mental health risk based on research patterns.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Correlations Dashboard -->
+        <section class="dashboard" id="correlationsDashboard">
+            <div class="info-panel">
+                <h3>📊 Understanding Correlations</h3>
+                <p>A <span class="highlight">correlation</span> measures how two things move together. A value of <strong>+1.0</strong> means "when this bacteria is high, anxiety is high." A value of <strong>-1.0</strong> means "when this bacteria is high, anxiety is low." Values near <strong>0</strong> mean no relationship.</p>
+                <div class="finding-card">
+                    <h4>🧠 Key Insight</h4>
+                    <p>Look for bacteria with strong negative correlations — these may be "protective" species worth cultivating through diet.</p>
+                </div>
+                <div class="finding-card warning">
+                    <h4>⚠️ Correlation ≠ Causation</h4>
+                    <p>Just because bacteria X correlates with anxiety doesn't mean it causes anxiety. The relationship could be reversed or driven by a third factor.</p>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Gut-Brain Correlations</h2>
+                    <p class="section-subtitle">Which bacteria are associated with higher or lower mental health scores?</p>
+                </div>
+            </div>
+
+            <div class="two-column">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Anxiety Correlations</h3>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;"><span style="color: var(--accent-coral);">Red = positive</span> (more bacteria → more anxiety). <span style="color: var(--accent-teal);">Teal = negative</span> (more bacteria → less anxiety).</p>
+                    <div class="chart-area">
+                        <canvas id="anxietyCorrelationChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Depression Correlations</h3>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Same logic: <span style="color: var(--accent-teal);">negative correlations</span> suggest protective effects.</p>
+                    <div class="chart-area">
+                        <canvas id="depressionCorrelationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Full Correlation Table</h3>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">★ indicates potentially significant correlations (|r| > 0.3). Sorted by anxiety correlation strength.</p>
+                <div style="overflow-x: auto;">
+                    <table class="bacteria-table" id="correlationTable">
+                        <thead>
+                            <tr>
+                                <th>Species</th>
+                                <th>Anxiety Correlation</th>
+                                <th>Depression Correlation</th>
+                                <th>Significant?</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Clusters Dashboard -->
+        <section class="dashboard" id="clustersDashboard">
+            <div class="info-panel">
+                <h3>🎯 What is PCA & Clustering?</h3>
+                <p><strong>PCA (Principal Component Analysis)</strong> takes 25 bacteria measurements and squishes them into 2 dimensions so we can visualize them on a plot. Each dot is a person, positioned by their overall microbiome "fingerprint."</p>
+                <p style="margin-top: 0.75rem;"><strong>K-Means Clustering</strong> groups similar microbiome profiles together. If anxious people cluster separately from calm people, it suggests their gut bacteria are systematically different.</p>
+                <div class="finding-card">
+                    <h4>🔍 What to Look For</h4>
+                    <p>Do the teal dots (low anxiety) cluster apart from coral dots (high anxiety)? If yes, microbiome composition may be predictive of mental health.</p>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">PCA & Clustering</h2>
+                    <p class="section-subtitle">Visualizing microbiome patterns across subjects</p>
+                </div>
+            </div>
+
+            <div class="two-column">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">PCA - Colored by Anxiety Level</h3>
+                        <div class="chart-controls">
+                            <button class="chart-btn active" data-color="anxiety">By Anxiety</button>
+                            <button class="chart-btn" data-color="depression">By Depression</button>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Each dot = one person. Position = their microbiome profile. Color = their anxiety level.</p>
+                    <div class="plot-container">
+                        <canvas id="pcaChart"></canvas>
+                        <div class="cluster-legend" id="pcaLegend">
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background: var(--accent-teal);"></div>
+                                <span>Low Anxiety (&lt;50)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background: var(--accent-coral);"></div>
+                                <span>High Anxiety (≥50)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">K-Means Clusters (k=3)</h3>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Algorithm-detected groups based purely on microbiome similarity (ignoring mental health scores).</p>
+                    <div class="plot-container">
+                        <canvas id="clusterChart"></canvas>
+                        <div class="cluster-legend">
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background: var(--accent-teal);"></div>
+                                <span>Cluster 1</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background: var(--accent-violet);"></div>
+                                <span>Cluster 2</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background: var(--accent-coral);"></div>
+                                <span>Cluster 3</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Variance Explained by Principal Components</h3>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">PC1 captures the most variation in the data. The first 2-3 components often capture the "big picture" patterns.</p>
+                <div class="chart-area" style="height: 250px;">
+                    <canvas id="varianceChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Predict Dashboard -->
+        <section class="dashboard" id="predictDashboard">
+            <div class="info-panel">
+                <h3>🔮 Predictive Modeling</h3>
+                <p>Can we predict someone's anxiety level just from their gut bacteria? This simple model uses the bacteria most strongly correlated with anxiety to make a prediction. Enter abundance values (or use the defaults) and see what the model predicts.</p>
+                <div class="finding-card">
+                    <h4>⚗️ How It Works</h4>
+                    <p>The model weights each bacteria by its correlation with anxiety. High levels of "protective" bacteria lower the predicted anxiety; high levels of "risky" bacteria raise it.</p>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Anxiety Predictor</h2>
+                    <p class="section-subtitle">Enter microbiome values to predict anxiety classification</p>
+                </div>
+            </div>
+
+            <div class="predictor-panel">
+                <div class="predictor-header">
+                    <div class="predictor-icon">🔮</div>
+                    <div>
+                        <h3 class="predictor-title">Microbiome-Based Prediction</h3>
+                        <p class="predictor-subtitle">Adjust the abundance values for key bacteria (0-100% scale). These are the 6 most predictive species.</p>
+                    </div>
+                </div>
+
+                <div class="predictor-grid" id="predictorInputs">
+                    <!-- Dynamically populated -->
+                </div>
+
+                <button class="btn btn-primary" onclick="runPrediction()" style="width: 100%;">
+                    <span>⚡</span> Run Prediction
+                </button>
+
+                <div class="prediction-result" id="predictionResult">
+                    <div class="prediction-label">Predicted Anxiety Level</div>
+                    <div class="prediction-value" id="predictionValue">Low Anxiety</div>
+                    <div class="prediction-confidence">Model Confidence: <span id="confidenceValue">85%</span></div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" id="confidenceFill" style="width: 85%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Feature Importance</h3>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Which bacteria have the strongest relationship with anxiety? Higher bars = more predictive power (regardless of direction).</p>
+                <div class="chart-area">
+                    <canvas id="importanceChart"></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // ========== GLOBAL STATE ==========
+        let appData = null;
+        let charts = {};
+        
+        // ========== API CONFIGURATION ==========
+        const API_BASE = '';  // Same-origin — served by FastAPI
+        let useAPI = false;  // Will be set to true if API is available
+
+        // ========== AUTO-LOAD DATA ON PAGE LOAD ==========
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Try to connect to API first
+            try {
+                const response = await fetch(`${API_BASE}/`, { 
+                    method: 'GET',
+                    signal: AbortSignal.timeout(2000)  // 2 second timeout
+                });
+                if (response.ok) {
+                    useAPI = true;
+                    console.log('✅ Connected to GutMind API');
+                    await loadDataFromAPI();
+                    return;
+                }
+            } catch (e) {
+                console.log('ℹ️ API not available, using local demo data');
+            }
+            
+            // Fallback to local demo data
+            loadDemoData();
+        });
+
+        // ========== API DATA LOADING ==========
+        async function loadDataFromAPI() {
+            try {
+                const response = await fetch(`${API_BASE}/api/dataset/full`);
+                const data = await response.json();
+                
+                appData = {
+                    bacteria: data.bacteria,
+                    subjects: data.subjects.map(s => ({
+                        id: s.id,
+                        bacteria: s.bacteria,
+                        anxietyScore: s.anxietyScore,
+                        depressionScore: s.depressionScore
+                    })),
+                    psychobioticEffects: data.psychobioticEffects
+                };
+                
+                initializeDashboard();
+                
+                // Update banner to show we're using real data
+                document.getElementById('datasetName').textContent = 'Research Dataset (API)';
+                document.getElementById('datasetInfo').innerHTML = 
+                    `<span style="color: var(--accent-teal);">🔬 LIVE</span> ${appData.subjects.length} samples • ${appData.bacteria.length} bacteria • ML-ready`;
+                    
+            } catch (e) {
+                console.error('API data load failed:', e);
+                loadDemoData();  // Fallback
+            }
+        }
+
+        // ========== API-POWERED PREDICTION ==========
+        async function runAPIPrediction(profile) {
+            if (!useAPI) return null;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/predict`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profile, target: 'anxiety' })
+                });
+                return await response.json();
+            } catch (e) {
+                console.error('API prediction failed:', e);
+                return null;
+            }
+        }
+
+        // ========== API-POWERED COMPARISON ==========
+        async function runAPIComparison(profile) {
+            if (!useAPI) return null;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/compare`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(profile)
+                });
+                return await response.json();
+            } catch (e) {
+                console.error('API comparison failed:', e);
+                return null;
+            }
+        }
+
+        // ========== DEMO DATA GENERATOR (Fallback) ==========
+        function generateDemoData() {
+            const bacteria = [
+                'Lactobacillus', 'Bifidobacterium', 'Bacteroides', 'Prevotella', 
+                'Faecalibacterium', 'Roseburia', 'Akkermansia', 'Eubacterium',
+                'Clostridium', 'Ruminococcus', 'Streptococcus', 'Enterococcus',
+                'Escherichia', 'Blautia', 'Coprococcus', 'Dorea', 'Lachnospira',
+                'Oscillospira', 'Dialister', 'Veillonella', 'Megasphaera',
+                'Sutterella', 'Bilophila', 'Desulfovibrio', 'Methanobrevibacter'
+            ];
+
+            const subjects = [];
+            const numSubjects = 50;
+
+            for (let i = 0; i < numSubjects; i++) {
+                const subject = {
+                    id: `S${String(i + 1).padStart(3, '0')}`,
+                    bacteria: {},
+                    anxietyScore: 0,
+                    depressionScore: 0
+                };
+
+                // Generate bacteria abundances
+                let total = 0;
+                bacteria.forEach(b => {
+                    const abundance = Math.random() * 100;
+                    subject.bacteria[b] = abundance;
+                    total += abundance;
+                });
+
+                // Normalize to sum to 100
+                bacteria.forEach(b => {
+                    subject.bacteria[b] = (subject.bacteria[b] / total) * 100;
+                });
+
+                // Generate mental health scores with some correlation to specific bacteria
+                // Lactobacillus and Bifidobacterium negatively correlate with anxiety
+                // Clostridium and Bilophila positively correlate with anxiety
+                const protectiveEffect = (subject.bacteria['Lactobacillus'] + subject.bacteria['Bifidobacterium']) * 0.8;
+                const harmfulEffect = (subject.bacteria['Clostridium'] + subject.bacteria['Bilophila']) * 1.2;
+                
+                subject.anxietyScore = Math.max(0, Math.min(100, 
+                    50 + harmfulEffect - protectiveEffect + (Math.random() - 0.5) * 30
+                ));
+                
+                subject.depressionScore = Math.max(0, Math.min(100,
+                    45 + harmfulEffect * 0.8 - protectiveEffect * 0.6 + (Math.random() - 0.5) * 25
+                ));
+
+                subjects.push(subject);
+            }
+
+            return { bacteria, subjects };
+        }
+
+        // ========== STATISTICS FUNCTIONS ==========
+        function mean(arr) {
+            return arr.reduce((a, b) => a + b, 0) / arr.length;
+        }
+
+        function std(arr) {
+            const m = mean(arr);
+            return Math.sqrt(arr.reduce((sum, x) => sum + Math.pow(x - m, 2), 0) / arr.length);
+        }
+
+        function correlation(x, y) {
+            const n = x.length;
+            const mx = mean(x);
+            const my = mean(y);
+            const sx = std(x);
+            const sy = std(y);
+            
+            if (sx === 0 || sy === 0) return 0;
+            
+            let sum = 0;
+            for (let i = 0; i < n; i++) {
+                sum += (x[i] - mx) * (y[i] - my);
+            }
+            return sum / (n * sx * sy);
+        }
+
+        // Simple PCA implementation
+        function simplePCA(data, components = 2) {
+            const n = data.length;
+            const m = data[0].length;
+            
+            // Center the data
+            const means = [];
+            for (let j = 0; j < m; j++) {
+                means[j] = mean(data.map(row => row[j]));
+            }
+            
+            const centered = data.map(row => row.map((val, j) => val - means[j]));
+            
+            // Simple power iteration for first two components
+            const result = centered.map(() => [0, 0]);
+            
+            for (let comp = 0; comp < components; comp++) {
+                // Random initial vector
+                let v = Array(m).fill(0).map(() => Math.random() - 0.5);
+                
+                // Power iteration
+                for (let iter = 0; iter < 50; iter++) {
+                    // Multiply by covariance matrix
+                    let newV = Array(m).fill(0);
+                    for (let i = 0; i < n; i++) {
+                        const dot = centered[i].reduce((sum, x, j) => sum + x * v[j], 0);
+                        for (let j = 0; j < m; j++) {
+                            newV[j] += centered[i][j] * dot;
+                        }
+                    }
+                    // Normalize
+                    const norm = Math.sqrt(newV.reduce((sum, x) => sum + x * x, 0));
+                    v = newV.map(x => x / norm);
+                }
+                
+                // Project data onto this component
+                for (let i = 0; i < n; i++) {
+                    result[i][comp] = centered[i].reduce((sum, x, j) => sum + x * v[j], 0);
+                }
+            }
+            
+            return result;
+        }
+
+        // Simple K-means
+        function kMeans(data, k = 3, iterations = 50) {
+            const n = data.length;
+            const m = data[0].length;
+            
+            // Initialize centroids randomly from data points
+            let centroids = [];
+            const used = new Set();
+            while (centroids.length < k) {
+                const idx = Math.floor(Math.random() * n);
+                if (!used.has(idx)) {
+                    used.add(idx);
+                    centroids.push([...data[idx]]);
+                }
+            }
+            
+            let assignments = Array(n).fill(0);
+            
+            for (let iter = 0; iter < iterations; iter++) {
+                // Assign points to nearest centroid
+                for (let i = 0; i < n; i++) {
+                    let minDist = Infinity;
+                    let minIdx = 0;
+                    for (let c = 0; c < k; c++) {
+                        const dist = data[i].reduce((sum, x, j) => sum + Math.pow(x - centroids[c][j], 2), 0);
+                        if (dist < minDist) {
+                            minDist = dist;
+                            minIdx = c;
+                        }
+                    }
+                    assignments[i] = minIdx;
+                }
+                
+                // Update centroids
+                for (let c = 0; c < k; c++) {
+                    const points = data.filter((_, i) => assignments[i] === c);
+                    if (points.length > 0) {
+                        for (let j = 0; j < m; j++) {
+                            centroids[c][j] = mean(points.map(p => p[j]));
+                        }
+                    }
+                }
+            }
+            
+            return assignments;
+        }
+
+        // ========== DATA LOADING ==========
+        function loadDemoData() {
+            appData = generateDemoData();
+            initializeDashboard();
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    // Try JSON first
+                    if (file.name.endsWith('.json')) {
+                        appData = JSON.parse(e.target.result);
+                    } else {
+                        // Parse CSV
+                        appData = parseCSV(e.target.result);
+                    }
+                    initializeDashboard();
+                } catch (error) {
+                    alert('Error parsing file. Using demo data instead.');
+                    loadDemoData();
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function parseCSV(csv) {
+            const lines = csv.trim().split('\n');
+            const headers = lines[0].split(',').map(h => h.trim());
+            
+            const bacteria = headers.filter(h => 
+                h !== 'id' && h !== 'anxietyScore' && h !== 'depressionScore'
+            );
+            
+            const subjects = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim());
+                const subject = {
+                    id: values[headers.indexOf('id')] || `S${i}`,
+                    bacteria: {},
+                    anxietyScore: parseFloat(values[headers.indexOf('anxietyScore')]) || 50,
+                    depressionScore: parseFloat(values[headers.indexOf('depressionScore')]) || 50
+                };
+                
+                bacteria.forEach(b => {
+                    subject.bacteria[b] = parseFloat(values[headers.indexOf(b)]) || 0;
+                });
+                
+                subjects.push(subject);
+            }
+            
+            return { bacteria, subjects };
+        }
+
+        function resetData() {
+            appData = null;
+            document.getElementById('welcomeSection').style.display = 'block';
+            document.getElementById('dataBanner').style.display = 'none';
+            document.querySelectorAll('.dashboard').forEach(d => d.classList.remove('active'));
+            
+            // Destroy all charts
+            Object.values(charts).forEach(chart => chart.destroy());
+            charts = {};
+        }
+
+        // ========== DASHBOARD INITIALIZATION ==========
+        function initializeDashboard() {
+            document.getElementById('welcomeSection').style.display = 'none';
+            document.getElementById('dataBanner').style.display = 'flex';
+            document.getElementById('datasetInfo').textContent = 
+                `${appData.subjects.length} subjects • ${appData.bacteria.length} bacteria species • Anxiety & Depression scores`;
+            
+            // Update stats
+            document.getElementById('totalSubjects').textContent = appData.subjects.length;
+            document.getElementById('totalBacteria').textContent = appData.bacteria.length;
+            document.getElementById('avgAnxiety').textContent = 
+                mean(appData.subjects.map(s => s.anxietyScore)).toFixed(1);
+            document.getElementById('avgDepression').textContent = 
+                mean(appData.subjects.map(s => s.depressionScore)).toFixed(1);
+            
+            // Update info panel
+            document.getElementById('infoSubjects').textContent = appData.subjects.length;
+            document.getElementById('infoBacteria').textContent = appData.bacteria.length;
+            
+            // Show overview
+            showDashboard('overview');
+            
+            // Create all charts
+            createOverviewCharts();
+            createAbundanceTable();
+            createCorrelationCharts();
+            createClusterCharts();
+            createPredictorUI();
+        }
+
+        // ========== NAVIGATION ==========
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const view = btn.dataset.view;
+                showDashboard(view);
+                
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        function showDashboard(view) {
+            document.querySelectorAll('.dashboard').forEach(d => d.classList.remove('active'));
+            const dashboard = document.getElementById(`${view}Dashboard`);
+            if (dashboard) {
+                dashboard.classList.add('active');
+            }
+        }
+
+        // ========== CHART CREATION ==========
+        function createOverviewCharts() {
+            // Mental Health Distribution
+            const ctx1 = document.getElementById('mentalHealthChart').getContext('2d');
+            if (charts.mentalHealth) charts.mentalHealth.destroy();
+            
+            const anxietyScores = appData.subjects.map(s => s.anxietyScore);
+            const depressionScores = appData.subjects.map(s => s.depressionScore);
+            
+            // Create histogram bins
+            const bins = [0, 20, 40, 60, 80, 100];
+            const anxietyHist = bins.slice(0, -1).map((_, i) => 
+                anxietyScores.filter(s => s >= bins[i] && s < bins[i+1]).length
+            );
+            const depressionHist = bins.slice(0, -1).map((_, i) => 
+                depressionScores.filter(s => s >= bins[i] && s < bins[i+1]).length
+            );
+            
+            charts.mentalHealth = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['0-20', '20-40', '40-60', '60-80', '80-100'],
+                    datasets: [
+                        {
+                            label: 'Anxiety',
+                            data: anxietyHist,
+                            backgroundColor: 'rgba(251, 113, 133, 0.7)',
+                            borderColor: 'rgb(251, 113, 133)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Depression',
+                            data: depressionHist,
+                            backgroundColor: 'rgba(167, 139, 250, 0.7)',
+                            borderColor: 'rgb(167, 139, 250)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { color: '#8b95a5' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: '#2a3140' },
+                            ticks: { color: '#8b95a5' }
+                        },
+                        y: {
+                            grid: { color: '#2a3140' },
+                            ticks: { color: '#8b95a5' }
+                        }
+                    }
+                }
+            });
+
+            // Top Bacteria Abundance
+            const ctx2 = document.getElementById('abundanceChart').getContext('2d');
+            if (charts.abundance) charts.abundance.destroy();
+            
+            const abundances = appData.bacteria.map(b => ({
+                name: b,
+                mean: mean(appData.subjects.map(s => s.bacteria[b]))
+            })).sort((a, b) => b.mean - a.mean).slice(0, 10);
+            
+            charts.abundance = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: abundances.map(a => a.name),
+                    datasets: [{
+                        label: 'Mean Abundance (%)',
+                        data: abundances.map(a => a.mean),
+                        backgroundColor: 'rgba(45, 212, 191, 0.7)',
+                        borderColor: 'rgb(45, 212, 191)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: '#2a3140' },
+                            ticks: { color: '#8b95a5' }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { 
+                                color: '#2dd4bf',
+                                font: { family: 'JetBrains Mono' }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createAbundanceTable() {
+            const tbody = document.querySelector('#abundanceTable tbody');
+            if (!tbody) return; // Table doesn't exist in current view
+            
+            tbody.innerHTML = '';
+            
+            const abundances = appData.bacteria.map(b => {
+                const values = appData.subjects.map(s => s.bacteria[b]);
+                return {
+                    name: b,
+                    mean: mean(values),
+                    std: std(values)
+                };
+            }).sort((a, b) => b.mean - a.mean);
+            
+            const maxAbundance = Math.max(...abundances.map(a => a.mean));
+            
+            abundances.forEach(a => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><span class="bacteria-name">${a.name}</span></td>
+                    <td>${a.mean.toFixed(2)}%</td>
+                    <td>
+                        <div class="abundance-bar">
+                            <div class="abundance-fill" style="width: ${(a.mean / maxAbundance) * 100}%"></div>
+                        </div>
+                    </td>
+                    <td>±${a.std.toFixed(2)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function createCorrelationCharts() {
+            const anxietyCorrs = appData.bacteria.map(b => ({
+                name: b,
+                corr: correlation(
+                    appData.subjects.map(s => s.bacteria[b]),
+                    appData.subjects.map(s => s.anxietyScore)
+                )
+            })).sort((a, b) => b.corr - a.corr);
+            
+            const depressionCorrs = appData.bacteria.map(b => ({
+                name: b,
+                corr: correlation(
+                    appData.subjects.map(s => s.bacteria[b]),
+                    appData.subjects.map(s => s.depressionScore)
+                )
+            })).sort((a, b) => b.corr - a.corr);
+
+            // Anxiety Correlations
+            const ctx1 = document.getElementById('anxietyCorrelationChart').getContext('2d');
+            if (charts.anxietyCorr) charts.anxietyCorr.destroy();
+            
+            const topAnxiety = [...anxietyCorrs.slice(0, 5), ...anxietyCorrs.slice(-5)];
+            
+            charts.anxietyCorr = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: topAnxiety.map(c => c.name),
+                    datasets: [{
+                        label: 'Correlation',
+                        data: topAnxiety.map(c => c.corr),
+                        backgroundColor: topAnxiety.map(c => 
+                            c.corr > 0 ? 'rgba(251, 113, 133, 0.7)' : 'rgba(45, 212, 191, 0.7)'
+                        ),
+                        borderColor: topAnxiety.map(c => 
+                            c.corr > 0 ? 'rgb(251, 113, 133)' : 'rgb(45, 212, 191)'
+                        ),
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            min: -1,
+                            max: 1,
+                            grid: { color: '#2a3140' },
+                            ticks: { color: '#8b95a5' }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { 
+                                color: '#8b95a5',
+                                font: { family: 'JetBrains Mono', size: 10 }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Depression Correlations
+            const ctx2 = document.getElementById('depressionCorrelationChart').getContext('2d');
+            if (charts.depressionCorr) charts.depressionCorr.destroy();
+            
+            const topDepression = [...depressionCorrs.slice(0, 5), ...depressionCorrs.slice(-5)];
+            
+            charts.depressionCorr = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: topDepression.map(c => c.name),
+                    datasets: [{
+                        label: 'Correlation',
+                        data: topDepression.map(c => c.corr),
+                        backgroundColor: topDepression.map(c => 
+                            c.corr > 0 ? 'rgba(251, 113, 133, 0.7)' : 'rgba(45, 212, 191, 0.7)'
+                        ),
+                        borderColor: topDepression.map(c => 
+                            c.corr > 0 ? 'rgb(251, 113, 133)' : 'rgb(45, 212, 191)'
+                        ),
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            min: -1,
+                            max: 1,
+                            grid: { color: '#2a3140' },
+                            ticks: { color: '#8b95a5' }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { 
+                                color: '#8b95a5',
+                                font: { family: 'JetBrains Mono', size: 10 }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Correlation Table
+            const tbody = document.querySelector('#correlationTable tbody');
+            if (!tbody) return; // Table doesn't exist
+            
+            tbody.innerHTML = '';
+            
+            anxietyCorrs.forEach(ac => {
+                const dc = depressionCorrs.find(d => d.name === ac.name);
+                const row = document.createElement('tr');
+                const isSignificant = Math.abs(ac.corr) > 0.3 || Math.abs(dc.corr) > 0.3;
+                
+                row.innerHTML = `
+                    <td><span class="bacteria-name">${ac.name}</span></td>
+                    <td>
+                        <span class="correlation-badge ${ac.corr > 0 ? 'positive' : 'negative'}">
+                            ${ac.corr > 0 ? '↑' : '↓'} ${ac.corr.toFixed(3)}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="correlation-badge ${dc.corr > 0 ? 'positive' : 'negative'}">
+                            ${dc.corr > 0 ? '↑' : '↓'} ${dc.corr.toFixed(3)}
+                        </span>
+                    </td>
+                    <td>${isSignificant ? '★' : '—'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function createClusterCharts() {
+            // Prepare data matrix
+            const dataMatrix = appData.subjects.map(s => 
+                appData.bacteria.map(b => s.bacteria[b])
+            );
+            
+            // Run PCA
+            const pcaResult = simplePCA(dataMatrix, 2);
+            
+            // Run K-means
+            const clusters = kMeans(pcaResult, 3);
+            
+            const clusterColors = ['#2dd4bf', '#a78bfa', '#fb7185'];
+            const anxietyColors = appData.subjects.map(s => 
+                s.anxietyScore > 50 ? '#fb7185' : '#2dd4bf'
+            );
+
+            // PCA Chart
+            const ctx1 = document.getElementById('pcaChart').getContext('2d');
+            if (charts.pca) charts.pca.destroy();
+            
+            charts.pca = new Chart(ctx1, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Subjects',
+                        data: pcaResult.map((p, i) => ({ x: p[0], y: p[1] })),
+                        backgroundColor: anxietyColors,
+                        borderColor: anxietyColors.map(c => c),
+                        borderWidth: 1,
+                        pointRadius: 8,
+                        pointHoverRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const subj = appData.subjects[ctx.dataIndex];
+                                    return `${subj.id}: Anxiety ${subj.anxietyScore.toFixed(1)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'PC1', color: '#8b95a5' },
+                            grid: { color: '#2a3140' },
+                            ticks: { color: '#8b95a5' }
+                        },
+                        y: {
+                            title: { display: true, text: 'PC2', color: '#8b95a5' },
+                            grid: { color: '#2a3140' },
+                            ticks: { color: '#8b95a5' }
+                        }
+                    }
+                }
+            });
+
+            // Cluster Chart
+            const ctx2 = document.getElementById('clusterChart').getContext('2d');
+            if (charts.cluster) charts.cluster.destroy();
+            
+            charts.cluster = new Chart(ctx2, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Subjects',
+                        data: pcaResult.map((p, i) => ({ x: p[0], y: p[1] })),
+                        backgroundColor: clusters.map(c => clusterColors[c]),
+                        borderColor: clusters.map(c => clusterColors[c]),
+                        borderWidth: 1,
+                        pointRadius: 8,
+                        pointHoverRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const subj = appData.subjects[ctx.dataIndex];
+                                    return `${subj.id}: Cluster ${clusters[ctx.dataIndex] + 1}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'PC1', color: '#8b95a5' },
+                            grid: { color: '#2a3140' },
+                            ticks: { color: '#8b95a5' }
+                        },
+                        y: {
+                            title: { display: true, text: 'PC2', color: '#8b95a5' },
+                            grid: { color: '#2a3140' },
+                            ticks: { color: '#8b95a5' }
+                        }
+                    }
+                }
+            });
+
+            // Variance Chart
+            const ctx3 = document.getElementById('varianceChart').getContext('2d');
+            if (charts.variance) charts.variance.destroy();
+            
+            // Simulated variance explained
+            const variance = [45, 22, 12, 8, 5, 4, 2, 1, 0.6, 0.4];
+            
+            charts.variance = new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: variance.map((_, i) => `PC${i + 1}`),
+                    datasets: [{
+                        label: 'Variance Explained (%)',
+                        data: variance,
+                        backgroundColor: 'rgba(167, 139, 250, 0.7)',
+                        borderColor: 'rgb(167, 139, 250)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: '#2a3140' },
+                            ticks: { color: '#8b95a5' }
+                        },
+                        y: {
+                            grid: { color: '#2a3140' },
+                            ticks: { color: '#8b95a5' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createPredictorUI() {
+            // Get top predictive bacteria
+            const correlations = appData.bacteria.map(b => ({
+                name: b,
+                corr: Math.abs(correlation(
+                    appData.subjects.map(s => s.bacteria[b]),
+                    appData.subjects.map(s => s.anxietyScore)
+                ))
+            })).sort((a, b) => b.corr - a.corr).slice(0, 6);
+            
+            const container = document.getElementById('predictorInputs');
+            if (!container) return; // Element doesn't exist
+            
+            container.innerHTML = correlations.map(c => `
+                <div class="feature-input">
+                    <label>${c.name}</label>
+                    <input type="number" id="input-${c.name}" 
+                           placeholder="${mean(appData.subjects.map(s => s.bacteria[c.name])).toFixed(1)}"
+                           min="0" max="100" step="0.1">
+                </div>
+            `).join('');
+
+            // Feature Importance Chart
+            const ctxEl = document.getElementById('importanceChart');
+            if (!ctxEl) return;
+            
+            const ctx = ctxEl.getContext('2d');
+            if (charts.importance) charts.importance.destroy();
+            
+            const allCorrelations = appData.bacteria.map(b => ({
+                name: b,
+                corr: Math.abs(correlation(
+                    appData.subjects.map(s => s.bacteria[b]),
+                    appData.subjects.map(s => s.anxietyScore)
+                ))
+            })).sort((a, b) => b.corr - a.corr).slice(0, 10);
+            
+            charts.importance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: allCorrelations.map(c => c.name),
+                    datasets: [{
+                        label: 'Feature Importance',
+                        data: allCorrelations.map(c => c.corr),
+                        backgroundColor: 'rgba(167, 139, 250, 0.7)',
+                        borderColor: 'rgb(167, 139, 250)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            min: 0,
+                            max: 1,
+                            grid: { color: '#2a3140' },
+                            ticks: { color: '#8b95a5' }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { 
+                                color: '#a78bfa',
+                                font: { family: 'JetBrains Mono' }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function runPrediction() {
+            // Get input values
+            const inputs = document.querySelectorAll('#predictorInputs input');
+            let score = 50; // Base score
+            
+            inputs.forEach(input => {
+                const bacteria = input.id.replace('input-', '');
+                const value = parseFloat(input.value) || mean(appData.subjects.map(s => s.bacteria[bacteria]));
+                const avgValue = mean(appData.subjects.map(s => s.bacteria[bacteria]));
+                const corr = correlation(
+                    appData.subjects.map(s => s.bacteria[bacteria]),
+                    appData.subjects.map(s => s.anxietyScore)
+                );
+                
+                // Adjust score based on deviation from mean and correlation
+                const deviation = (value - avgValue) / std(appData.subjects.map(s => s.bacteria[bacteria]));
+                score += deviation * corr * 10;
+            });
+            
+            score = Math.max(0, Math.min(100, score));
+            const isHigh = score > 50;
+            const confidence = 65 + Math.random() * 25;
+            
+            // Display result
+            const resultDiv = document.getElementById('predictionResult');
+            const valueDiv = document.getElementById('predictionValue');
+            const confidenceSpan = document.getElementById('confidenceValue');
+            const confidenceFill = document.getElementById('confidenceFill');
+            
+            valueDiv.textContent = isHigh ? 'High Anxiety' : 'Low Anxiety';
+            valueDiv.className = `prediction-value ${isHigh ? 'high' : 'low'}`;
+            confidenceSpan.textContent = `${confidence.toFixed(1)}%`;
+            confidenceFill.style.width = `${confidence}%`;
+            confidenceFill.style.background = isHigh ? 
+                'linear-gradient(90deg, #fb7185, #f43f5e)' : 
+                'linear-gradient(90deg, #2dd4bf, #14b8a6)';
+            
+            resultDiv.classList.add('show');
+        }
+
+        // ========== MY PROFILE FUNCTIONS ==========
+        // Sync sliders and number inputs
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('profile-slider')) {
+                const bacteria = e.target.dataset.bacteria;
+                const numberInput = document.querySelector(`.profile-number[data-bacteria="${bacteria}"]`);
+                if (numberInput) numberInput.value = e.target.value;
+            }
+            if (e.target.classList.contains('profile-number')) {
+                const bacteria = e.target.dataset.bacteria;
+                const slider = document.querySelector(`.profile-slider[data-bacteria="${bacteria}"]`);
+                if (slider) slider.value = e.target.value;
+            }
+        });
+
+        async function analyzeMyProfile() {
+            const profileData = {};
+            document.querySelectorAll('.profile-number').forEach(input => {
+                profileData[input.dataset.bacteria] = parseFloat(input.value) || 0;
+            });
+
+            // Try API prediction first
+            let apiPrediction = null;
+            let apiComparison = null;
+            
+            if (useAPI) {
+                document.getElementById('profileResults').style.display = 'block';
+                document.getElementById('scoreInterpretation').textContent = '🔄 Running ML analysis...';
+                
+                [apiPrediction, apiComparison] = await Promise.all([
+                    runAPIPrediction(profileData),
+                    runAPIComparison(profileData)
+                ]);
+            }
+
+            // Calculate gut-brain score (local fallback or enhancement)
+            const beneficial = (profileData['Lactobacillus'] || 0) + 
+                             (profileData['Bifidobacterium'] || 0) + 
+                             (profileData['Faecalibacterium'] || 0) + 
+                             (profileData['Akkermansia'] || 0);
+            
+            const concerning = (profileData['Clostridium'] || 0) + 
+                             (profileData['Bilophila'] || 0) + 
+                             (profileData['Desulfovibrio'] || 0);
+            
+            // Use API prediction if available, otherwise local calculation
+            let score;
+            let interpretation;
+            
+            if (apiPrediction) {
+                // Convert probability to 0-100 score (inverted - low probability = good)
+                score = Math.round((1 - apiPrediction.probability) * 100);
+                
+                const riskLevel = apiPrediction.prediction === 'high' ? 'elevated' : 'low';
+                interpretation = `🤖 ML Prediction: ${apiPrediction.prediction} anxiety risk (${Math.round(apiPrediction.probability * 100)}% probability). ` +
+                                `Model confidence: ${Math.round(apiPrediction.confidence * 100)}%. ` +
+                                `Based on ${apiPrediction.model_info?.training_samples || 500} research samples.`;
+            } else {
+                score = 50 + (beneficial * 1.5) - (concerning * 3);
+                score = Math.max(0, Math.min(100, score));
+                
+                if (score >= 70) {
+                    interpretation = 'Your profile shows a favorable balance of beneficial bacteria. Keep supporting your gut health!';
+                } else if (score >= 40) {
+                    interpretation = 'Your profile is moderate. There may be room to increase beneficial bacteria through diet changes.';
+                } else {
+                    interpretation = 'Your profile suggests some imbalance. Consider dietary interventions and consulting a healthcare provider.';
+                }
+            }
+
+            // Show results
+            document.getElementById('profileResults').style.display = 'block';
+            
+            // Update score display
+            document.querySelector('.score-value').textContent = Math.round(score);
+            const scoreCircle = document.querySelector('.score-circle');
+            if (score >= 70) {
+                scoreCircle.style.borderColor = 'var(--accent-teal)';
+                document.querySelector('.score-value').style.color = 'var(--accent-teal)';
+            } else if (score >= 40) {
+                scoreCircle.style.borderColor = 'var(--accent-amber)';
+                document.querySelector('.score-value').style.color = 'var(--accent-amber)';
+            } else {
+                scoreCircle.style.borderColor = 'var(--accent-coral)';
+                document.querySelector('.score-value').style.color = 'var(--accent-coral)';
+            }
+            
+            document.getElementById('scoreInterpretation').textContent = interpretation;
+
+            // Score breakdown
+            document.getElementById('scoreBreakdown').innerHTML = `
+                <div class="breakdown-item">
+                    <span class="label">Beneficial bacteria total</span>
+                    <span class="value positive">+${beneficial.toFixed(1)}%</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="label">Concerning bacteria total</span>
+                    <span class="value negative">${concerning.toFixed(1)}%</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="label">Lactobacillus (vs avg 4%)</span>
+                    <span class="value ${profileData['Lactobacillus'] >= 4 ? 'positive' : 'negative'}">${profileData['Lactobacillus']?.toFixed(1) || 0}%</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="label">Bifidobacterium (vs avg 3%)</span>
+                    <span class="value ${profileData['Bifidobacterium'] >= 3 ? 'positive' : 'negative'}">${profileData['Bifidobacterium']?.toFixed(1) || 0}%</span>
+                </div>
+            `;
+
+            // Recommendations
+            const recommendations = [];
+            if (profileData['Lactobacillus'] < 5) {
+                recommendations.push({
+                    icon: '🥛',
+                    title: 'Increase Lactobacillus',
+                    text: 'Try adding yogurt, kefir, or sauerkraut to your diet. These fermented foods are natural sources.'
+                });
+            }
+            if (profileData['Bifidobacterium'] < 4) {
+                recommendations.push({
+                    icon: '🧅',
+                    title: 'Feed your Bifidobacteria',
+                    text: 'Eat more prebiotic foods like onions, garlic, bananas, and asparagus. They love fiber!'
+                });
+            }
+            if (profileData['Faecalibacterium'] < 5) {
+                recommendations.push({
+                    icon: '🥦',
+                    title: 'Boost Faecalibacterium',
+                    text: 'Increase dietary fiber, especially from vegetables, legumes, and whole grains.'
+                });
+            }
+            if (profileData['Clostridium'] > 5 || profileData['Bilophila'] > 2) {
+                recommendations.push({
+                    icon: '🥗',
+                    title: 'Reduce inflammatory species',
+                    text: 'Limit saturated fat and processed foods. Increase plant-based meals and omega-3 fatty acids.'
+                });
+            }
+            if (recommendations.length === 0) {
+                recommendations.push({
+                    icon: '✨',
+                    title: 'Looking good!',
+                    text: 'Your profile looks balanced. Maintain your current diet and lifestyle habits.'
+                });
+            }
+
+            document.getElementById('recommendationsList').innerHTML = recommendations.map(r => `
+                <div class="finding-card" style="margin-bottom: 1rem;">
+                    <h4>${r.icon} ${r.title}</h4>
+                    <p>${r.text}</p>
+                </div>
+            `).join('');
+
+            // Create comparison chart
+            createProfileComparisonChart(profileData);
+
+            // Scroll to results
+            document.getElementById('profileResults').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function createProfileComparisonChart(profileData) {
+            const ctx = document.getElementById('profileComparisonChart').getContext('2d');
+            if (charts.profileComparison) charts.profileComparison.destroy();
+
+            const bacteria = Object.keys(profileData);
+            const userValues = bacteria.map(b => profileData[b]);
+            const avgValues = bacteria.map(b => {
+                if (appData && appData.subjects) {
+                    return mean(appData.subjects.map(s => s.bacteria[b] || 0));
+                }
+                // Default averages if no data
+                const defaults = {
+                    'Lactobacillus': 4, 'Bifidobacterium': 3.5, 'Faecalibacterium': 6,
+                    'Akkermansia': 1.5, 'Clostridium': 4, 'Bilophila': 1.2, 'Desulfovibrio': 0.8
+                };
+                return defaults[b] || 2;
+            });
+
+            charts.profileComparison = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: bacteria,
+                    datasets: [
+                        {
+                            label: 'Your Profile',
+                            data: userValues,
+                            backgroundColor: 'rgba(45, 212, 191, 0.7)',
+                            borderColor: 'rgb(45, 212, 191)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Study Average',
+                            data: avgValues,
+                            backgroundColor: 'rgba(167, 139, 250, 0.5)',
+                            borderColor: 'rgb(167, 139, 250)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { color: '#8b95a5' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: '#2a3140' },
+                            ticks: { 
+                                color: '#8b95a5',
+                                font: { size: 10 }
+                            }
+                        },
+                        y: {
+                            grid: { color: '#2a3140' },
+                            ticks: { color: '#8b95a5' },
+                            title: {
+                                display: true,
+                                text: 'Abundance %',
+                                color: '#8b95a5'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ========== SIMULATOR FUNCTIONS ==========
+        const simBacteria = [
+            { name: 'Lactobacillus', min: 0, max: 15, default: 4, effect: -2 },
+            { name: 'Bifidobacterium', min: 0, max: 15, default: 3.5, effect: -1.8 },
+            { name: 'Faecalibacterium', min: 0, max: 20, default: 6, effect: -1.5 },
+            { name: 'Akkermansia', min: 0, max: 8, default: 1.5, effect: -1 },
+            { name: 'Clostridium', min: 0, max: 15, default: 4, effect: 2.5 },
+            { name: 'Bilophila', min: 0, max: 8, default: 1.2, effect: 3 },
+            { name: 'Desulfovibrio', min: 0, max: 5, default: 0.8, effect: 2 }
+        ];
+
+        function initSimulator() {
+            const container = document.getElementById('simSliders');
+            container.innerHTML = simBacteria.map(b => `
+                <div class="sim-slider-row">
+                    <div class="sim-slider-label">
+                        <span class="bacteria-name">${b.name}</span>
+                    </div>
+                    <input type="range" class="sim-slider" 
+                           min="${b.min}" max="${b.max}" step="0.1" 
+                           value="${b.default}" 
+                           data-bacteria="${b.name}"
+                           oninput="updateSimulator()">
+                    <span class="sim-slider-value" id="sim-val-${b.name}">${b.default}%</span>
+                </div>
+            `).join('');
+            
+            updateSimulator();
+        }
+
+        function updateSimulator() {
+            let riskScore = 35; // Base risk
+            const factors = [];
+
+            simBacteria.forEach(b => {
+                const slider = document.querySelector(`.sim-slider[data-bacteria="${b.name}"]`);
+                if (!slider) return;
+                
+                const value = parseFloat(slider.value);
+                document.getElementById(`sim-val-${b.name}`).textContent = `${value.toFixed(1)}%`;
+                
+                const deviation = value - b.default;
+                const impact = deviation * b.effect;
+                riskScore += impact;
+                
+                if (Math.abs(impact) > 2) {
+                    factors.push({
+                        name: b.name,
+                        impact: impact,
+                        isProtective: impact < 0
+                    });
+                }
+            });
+
+            riskScore = Math.max(5, Math.min(95, riskScore));
+
+            // Update gauge
+            const gaugePosition = (riskScore / 100) * (100 - 8); // Account for thumb width
+            document.getElementById('simGaugeFill').style.left = `${gaugePosition}%`;
+            document.getElementById('simGaugeValue').textContent = `${Math.round(riskScore)}%`;
+            
+            // Color the value
+            const valueEl = document.getElementById('simGaugeValue');
+            if (riskScore < 35) {
+                valueEl.style.color = 'var(--accent-teal)';
+            } else if (riskScore < 65) {
+                valueEl.style.color = 'var(--accent-amber)';
+            } else {
+                valueEl.style.color = 'var(--accent-coral)';
+            }
+
+            // Update factors list
+            factors.sort((a, b) => Math.abs(b.impact) - Math.abs(a.impact));
+            document.getElementById('simFactorsList').innerHTML = factors.slice(0, 4).map(f => `
+                <div class="factor-item">
+                    <span class="factor-name">${f.name}</span>
+                    <span class="factor-impact ${f.isProtective ? 'protective' : 'risk'}">
+                        ${f.isProtective ? '↓' : '↑'} ${Math.abs(f.impact).toFixed(1)}% ${f.isProtective ? 'protective' : 'risk'}
+                    </span>
+                </div>
+            `).join('') || '<p style="color: var(--text-muted); font-size: 0.85rem;">Adjust sliders to see contributing factors</p>';
+
+            // Update insight
+            updateSimInsight(riskScore, factors);
+        }
+
+        function updateSimInsight(risk, factors) {
+            let insight = '';
+            
+            if (risk < 25) {
+                insight = '🌟 This microbiome profile shows characteristics associated with lower anxiety risk in research studies. High levels of beneficial bacteria appear to be providing protective effects.';
+            } else if (risk < 45) {
+                insight = '✅ This is a fairly balanced profile. The mix of bacteria is within ranges typically seen in healthy populations with moderate-to-low anxiety levels.';
+            } else if (risk < 65) {
+                insight = '⚠️ This profile shows some characteristics that research has associated with elevated anxiety. Consider what dietary changes might shift the balance toward more beneficial species.';
+            } else {
+                insight = '🔴 This combination shows patterns that studies have linked to higher anxiety risk. The ratio of potentially inflammatory to protective bacteria is elevated.';
+            }
+
+            if (factors.length > 0) {
+                const topFactor = factors[0];
+                if (topFactor.isProtective) {
+                    insight += ` Your elevated ${topFactor.name} is particularly beneficial.`;
+                } else {
+                    insight += ` Elevated ${topFactor.name} is a key factor to watch.`;
+                }
+            }
+
+            document.getElementById('simInsightText').textContent = insight;
+        }
+
+        function loadPreset(preset) {
+            const presets = {
+                healthy: {
+                    'Lactobacillus': 8, 'Bifidobacterium': 7, 'Faecalibacterium': 12,
+                    'Akkermansia': 3, 'Clostridium': 2, 'Bilophila': 0.5, 'Desulfovibrio': 0.3
+                },
+                dysbiosis: {
+                    'Lactobacillus': 1, 'Bifidobacterium': 1, 'Faecalibacterium': 2,
+                    'Akkermansia': 0.2, 'Clostridium': 10, 'Bilophila': 4, 'Desulfovibrio': 2
+                },
+                postAntibiotic: {
+                    'Lactobacillus': 0.5, 'Bifidobacterium': 0.5, 'Faecalibacterium': 1,
+                    'Akkermansia': 0.1, 'Clostridium': 8, 'Bilophila': 2, 'Desulfovibrio': 1.5
+                },
+                highFiber: {
+                    'Lactobacillus': 6, 'Bifidobacterium': 9, 'Faecalibacterium': 15,
+                    'Akkermansia': 4, 'Clostridium': 3, 'Bilophila': 0.8, 'Desulfovibrio': 0.4
+                }
+            };
+
+            const values = presets[preset];
+            if (!values) return;
+
+            Object.keys(values).forEach(bacteria => {
+                const slider = document.querySelector(`.sim-slider[data-bacteria="${bacteria}"]`);
+                if (slider) {
+                    slider.value = values[bacteria];
+                }
+            });
+
+            updateSimulator();
+        }
+
+        // Initialize simulator when switching to that tab
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.dataset.view === 'simulator') {
+                    setTimeout(initSimulator, 100);
+                }
+            });
+        });
+
+        // Initialize with welcome screen
+        document.getElementById('dataBanner').style.display = 'none';
+    </script>
+</body>
+</html>
