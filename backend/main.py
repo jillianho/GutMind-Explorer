@@ -3,19 +3,19 @@ GutMind Explorer - FastAPI Backend
 Real microbiome analysis API with ML predictions.
 """
 
-from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, UploadFile, File, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Dict, List, Optional, Any
-from pathlib import Path
 import pandas as pd
 import numpy as np
 import json
 import logging
+import os
 from io import StringIO
+from pathlib import Path
 
 from data_loader import (
     get_research_dataset, 
@@ -33,24 +33,11 @@ from ml_models import (
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
-@asynccontextmanager
-async def lifespan(app):
-    """Initialize models and data on startup."""
-    logger.info("Starting GutMind Explorer API...")
-    df = get_research_dataset()
-    logger.info(f"Research dataset loaded: {len(df)} samples")
-    model = get_trained_model()
-    logger.info(f"ML model trained: AUC = {model.training_stats['ensemble']['auc_roc']}")
-    yield
-
-
 # Initialize FastAPI app
 app = FastAPI(
     title="GutMind Explorer API",
     description="Microbiome-Mental Health Analysis Platform",
-    version="2.0.0",
-    lifespan=lifespan,
+    version="2.0.0"
 )
 
 # Enable CORS for frontend
@@ -90,25 +77,42 @@ class AnalysisRequest(BaseModel):
     params: Optional[Dict[str, Any]] = None
 
 
+# ============== Startup ==============
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize models and data on startup."""
+    logger.info("Starting GutMind Explorer API...")
+    
+    # Load research dataset
+    df = get_research_dataset()
+    logger.info(f"Research dataset loaded: {len(df)} samples")
+    
+    # Train model
+    model = get_trained_model()
+    logger.info(f"ML model trained: AUC = {model.training_stats['ensemble']['auc_roc']}")
+
+
 # ============== API Endpoints ==============
 
-# Resolve the frontend directory
-FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
-
-
 @app.get("/")
-async def serve_frontend():
-    """Serve the main web app."""
-    return FileResponse(FRONTEND_DIR / "index.html")
-
-
-@app.get("/api/health")
-async def health_check():
+async def root():
     """API health check."""
     return {
         "status": "online",
         "api": "GutMind Explorer",
-        "version": "2.0.0"
+        "version": "2.0.0",
+        "endpoints": [
+            "/api/dataset/info",
+            "/api/dataset/sample",
+            "/api/predict",
+            "/api/analyze/correlations",
+            "/api/analyze/pca",
+            "/api/analyze/clustering",
+            "/api/compare",
+            "/api/upload",
+            "/api/bacteria/info"
+        ]
     }
 
 
@@ -361,8 +365,20 @@ async def global_exception_handler(request, exc):
     )
 
 
+# ============== Serve Frontend ==============
+
+# Serve the frontend HTML
+@app.get("/app")
+async def serve_frontend():
+    frontend_path = Path(__file__).parent.parent / "frontend" / "index.html"
+    if frontend_path.exists():
+        return FileResponse(frontend_path)
+    return {"error": "Frontend not found"}
+
+
 # ============== Run Server ==============
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)

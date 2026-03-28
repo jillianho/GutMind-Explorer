@@ -929,7 +929,6 @@
 
         .profile-slider {
             width: 150px;
-            appearance: none;
             -webkit-appearance: none;
             height: 6px;
             border-radius: 3px;
@@ -1108,7 +1107,6 @@
 
         .sim-slider {
             flex: 1;
-            appearance: none;
             -webkit-appearance: none;
             height: 8px;
             border-radius: 4px;
@@ -1305,20 +1303,20 @@
         <!-- Overview Dashboard -->
         <section class="dashboard active" id="overviewDashboard">
             <div class="info-panel">
-                <h3>🔬 What is the Gut-Brain Axis?</h3>
-                <p>Your gut contains <span class="highlight">trillions of bacteria</span> that communicate with your brain via the vagus nerve, immune system, and metabolites they produce. Research shows that the composition of your gut microbiome may influence <span class="highlight-coral">anxiety, depression, and mood</span>.</p>
+                <h3>🔬 About This Dataset</h3>
+                <p>This visualization uses <span class="highlight">research-based synthetic data</span> generated from published scientific findings. The correlation patterns reflect real associations found in peer-reviewed studies linking gut bacteria to mental health.</p>
                 <div class="info-grid">
                     <div class="info-item">
-                        <h4>This Dataset</h4>
-                        <p>Simulated data for <strong id="infoSubjects">50</strong> people, measuring <strong id="infoBacteria">25</strong> bacterial species and their anxiety/depression scores.</p>
+                        <h4>Data Source</h4>
+                        <p>Synthetic data modeled on findings from <strong>Valles-Colomer et al. (2019)</strong> Nature Microbiology and <strong>Radjabzadeh et al. (2022)</strong> Nature Communications.</p>
                     </div>
                     <div class="info-item">
-                        <h4>What We're Looking For</h4>
-                        <p>Which bacteria are more common in people with <span class="highlight">low anxiety</span> vs <span class="highlight-coral">high anxiety</span>?</p>
+                        <h4>What We're Showing</h4>
+                        <p>Which bacteria are associated with <span class="highlight">better mental health</span> vs <span class="highlight-coral">higher symptoms</span> based on published research.</p>
                     </div>
                     <div class="info-item">
-                        <h4>Real Science</h4>
-                        <p>Studies link <em>Lactobacillus</em> and <em>Bifidobacterium</em> with lower anxiety. Some <em>Clostridia</em> correlate with higher anxiety.</p>
+                        <h4>Research Highlights</h4>
+                        <p><em>Coprococcus</em> and <em>Dialister</em> depleted in depression. <em>Eggerthella</em> elevated in depression. <em>Faecalibacterium</em> linked to quality of life.</p>
                     </div>
                 </div>
             </div>
@@ -1518,8 +1516,12 @@
             </div>
 
             <div class="finding-card" style="margin-top: 1rem;">
-                <h4>📚 Want to Learn More?</h4>
-                <p>Key research papers: Cryan & Dinan (2012) "Mind-altering microorganisms", Valles-Colomer et al. (2019) "The neuroactive potential of the human gut microbiota"</p>
+                <h4>📚 Research This Tool Is Based On</h4>
+                <p style="margin-bottom: 0.5rem;"><strong>Primary Sources:</strong></p>
+                <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">• Valles-Colomer M, et al. (2019) "The neuroactive potential of the human gut microbiota in quality of life and depression." <em>Nature Microbiology</em>, 4(4):623-632. <a href="https://doi.org/10.1038/s41564-018-0337-x" target="_blank" style="color: var(--accent-teal);">doi:10.1038/s41564-018-0337-x</a></p>
+                <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">• Radjabzadeh D, et al. (2022) "Gut microbiome-wide association study of depressive symptoms." <em>Nature Communications</em>, 13:7128. <a href="https://doi.org/10.1038/s41467-022-34502-3" target="_blank" style="color: var(--accent-teal);">doi:10.1038/s41467-022-34502-3</a></p>
+                <p style="font-size: 0.85rem;">• Simpson CA, et al. (2021) "The gut microbiota in anxiety and depression - A systematic review." <em>Clinical Psychology Review</em>, 83:101943.</p>
+                <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-muted);"><strong>Disclaimer:</strong> This tool uses synthetic data modeled on published research findings. It is for educational purposes only and should not be used for clinical decisions.</p>
             </div>
         </section>
 
@@ -1947,7 +1949,10 @@
         let charts = {};
         
         // ========== API CONFIGURATION ==========
-        const API_BASE = '';  // Same-origin — served by FastAPI
+        // Auto-detect: use same host when deployed, localhost when developing
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:8000'
+            : window.location.origin;
         let useAPI = false;  // Will be set to true if API is available
 
         // ========== AUTO-LOAD DATA ON PAGE LOAD ==========

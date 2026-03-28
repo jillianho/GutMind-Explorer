@@ -79,7 +79,8 @@ class MicrobiomeMentalHealthModel:
         logger.info(f"Training model for {target}...")
         
         X = self.prepare_features(df)
-        y = (df[target] == 'high').astype(int).values
+        # Binarize: moderate/severe/moderately_severe = high risk (1), else low risk (0)
+        y = df[target].isin(['moderate', 'severe', 'moderately_severe', 'high']).astype(int).values
         
         # Split data
         X_train, X_test, y_train, y_test = train_test_split(
