@@ -97,25 +97,14 @@ async def startup_event():
 
 # ============== API Endpoints ==============
 
+# Resolve the frontend directory
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+
+
 @app.get("/")
-async def root():
-    """API health check."""
-    return {
-        "status": "online",
-        "api": "GutMind Explorer",
-        "version": "2.0.0",
-        "endpoints": [
-            "/api/dataset/info",
-            "/api/dataset/sample",
-            "/api/predict",
-            "/api/analyze/correlations",
-            "/api/analyze/pca",
-            "/api/analyze/clustering",
-            "/api/compare",
-            "/api/upload",
-            "/api/bacteria/info"
-        ]
-    }
+async def serve_frontend():
+    """Serve the main web app."""
+    return FileResponse(FRONTEND_DIR / "index.html")
 
 
 @app.get("/api/dataset/info")
