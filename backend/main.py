@@ -81,16 +81,18 @@ class AnalysisRequest(BaseModel):
 
 @app.on_event("startup")
 async def startup_event():
-    """Initialize models and data on startup."""
+    """Initialize models and data on startup (non-blocking)."""
+    import threading
     logger.info("Starting GutMind Explorer API...")
-    
-    # Load research dataset
-    df = get_research_dataset()
-    logger.info(f"Research dataset loaded: {len(df)} samples")
-    
-    # Train model
-    model = get_trained_model()
-    logger.info(f"ML model trained: AUC = {model.training_stats['ensemble']['auc_roc']}")
+
+    def _train_in_background():
+        df = get_research_dataset()
+        logger.info(f"Research dataset loaded: {len(df)} samples")
+        model = get_trained_model()
+        logger.info(f"ML model trained: AUC = {model.training_stats['ensemble']['auc_roc']}")
+
+    threading.Thread(target=_train_in_background, daemon=True).start()
+    logger.info("Model training started in background — server is ready")
 
 
 # ============== API Endpoints ==============
