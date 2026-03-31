@@ -1977,25 +1977,45 @@
             </div>
 
             <div class="info-panel" style="background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(167, 139, 250, 0.08) 100%);">
-                <h3>🔬 Our Methodology</h3>
-                <p>The data and correlations in GutMind Explorer are grounded in peer-reviewed science:</p>
+                <h3>🔬 What's Real vs. What's Simulated</h3>
+                <p>Full transparency — here's a precise breakdown of what comes from science and what we generated:</p>
                 <div class="info-grid" style="margin-top: 1.5rem;">
-                    <div class="info-item">
-                        <h4>Research Foundation</h4>
-                        <p>Bacteria-mental health associations are parameterized from four key studies: <strong>Valles-Colomer et al. (2019)</strong> on gut neuroactive potential, <strong>Radjabzadeh et al. (2022)</strong> on microbiome-wide depression associations, <strong>Jiang et al. (2015)</strong> on MDD microbiota, and <strong>Simpson et al. (2021)</strong> meta-analysis.</p>
+                    <div class="info-item" style="border-left: 3px solid var(--accent-teal); padding-left: 1rem;">
+                        <h4 style="color: var(--accent-teal);">✅ REAL: Which bacteria go up or down</h4>
+                        <p>The <em>direction</em> of every correlation comes directly from published research. When you see Coprococcus as "protective" and Eggerthella as "risk-associated" — that reflects what scientists actually found in real patient studies (Valles-Colomer 2019, Radjabzadeh 2022, Jiang 2015, Simpson 2021).</p>
                     </div>
-                    <div class="info-item">
-                        <h4>Synthetic Data Model</h4>
-                        <p>500 samples are generated with research-derived effect sizes — e.g., Coprococcus depleted in depression (effect: −0.40), Eggerthella enriched (effect: +0.35). Correlation <em>directions</em> are real; exact values are simulated.</p>
+                    <div class="info-item" style="border-left: 3px solid var(--accent-teal); padding-left: 1rem;">
+                        <h4 style="color: var(--accent-teal);">✅ REAL: The clinical scales</h4>
+                        <p>Mental health scores use <strong>GAD-7</strong> (0–21) for anxiety and <strong>PHQ-9</strong> (0–27) for depression — the same validated instruments your doctor uses. The severity cutoffs (minimal, mild, moderate, severe) are standard clinical thresholds.</p>
                     </div>
-                    <div class="info-item">
-                        <h4>Clinical Scales</h4>
-                        <p>Mental health scores use validated clinical instruments: <strong>GAD-7</strong> (0–21) for anxiety and <strong>PHQ-9</strong> (0–27) for depression, with standard severity cutoffs.</p>
+                    <div class="info-item" style="border-left: 3px solid var(--accent-teal); padding-left: 1rem;">
+                        <h4 style="color: var(--accent-teal);">✅ REAL: The ML techniques</h4>
+                        <p>The prediction pipeline uses genuine scikit-learn models (Random Forest + Gradient Boosting ensemble) with proper cross-validation, train/test splits, and AUC-ROC evaluation — the same methods used in published microbiome research.</p>
                     </div>
-                    <div class="info-item">
-                        <h4>ML Pipeline</h4>
-                        <p>The prediction model is a real scikit-learn ensemble with cross-validated AUC-ROC, feature importance ranking, and proper train/test splits — not a toy calculation.</p>
+                    <div class="info-item" style="border-left: 3px solid var(--accent-teal); padding-left: 1rem;">
+                        <h4 style="color: var(--accent-teal);">✅ REAL: The biology</h4>
+                        <p>The Learn page content — GABA production by Lactobacillus, butyrate from Faecalibacterium, the vagus nerve pathway, serotonin in the gut — is all established science from the cited research.</p>
                     </div>
+                    <div class="info-item" style="border-left: 3px solid var(--accent-coral); padding-left: 1rem;">
+                        <h4 style="color: var(--accent-coral);">⚠️ SIMULATED: The exact numbers in charts</h4>
+                        <p>The specific correlation coefficients (e.g., r = −0.38) are <em>not</em> copied from any paper. They emerge from our simulation. The papers say "Coprococcus is significantly depleted in depression" — we coded that as an effect size of −0.40 and generated 500 data points. The resulting chart numbers are plausible but fabricated.</p>
+                    </div>
+                    <div class="info-item" style="border-left: 3px solid var(--accent-coral); padding-left: 1rem;">
+                        <h4 style="color: var(--accent-coral);">⚠️ SIMULATED: The 500 data points</h4>
+                        <p>Every individual sample is computationally generated — no real patients were measured. The dataset is designed so the <em>statistical patterns</em> match research findings, like a flight simulator models real physics without a real airplane.</p>
+                    </div>
+                    <div class="info-item" style="border-left: 3px solid var(--accent-coral); padding-left: 1rem;">
+                        <h4 style="color: var(--accent-coral);">⚠️ SIMULATED: The effect sizes</h4>
+                        <p>We approximated effect sizes from paper descriptions (e.g., "significantly depleted" → −0.40). These are informed estimates, not exact values extracted from the studies. Different approximations would produce different chart numbers.</p>
+                    </div>
+                    <div class="info-item" style="border-left: 3px solid var(--accent-coral); padding-left: 1rem;">
+                        <h4 style="color: var(--accent-coral);">⚠️ SIMULATED: ML predictions</h4>
+                        <p>The model is trained on simulated data, so its predictions reflect those simulated patterns — not clinical validation. It correctly learns which bacteria matter (because we encoded that), but its confidence scores are not clinically validated.</p>
+                    </div>
+                </div>
+                <div class="finding-card" style="margin-top: 1.5rem;">
+                    <h4>💡 Why this approach still matters</h4>
+                    <p>Real patient microbiome data is protected by privacy laws and requires IRB approval to access. By building on published effect sizes rather than raw data, we demonstrate a complete, functional pipeline — from data → visualization → ML prediction → personalized recommendations — that could be plugged into real clinical datasets when partnerships and approvals are in place. The architecture is production-ready; the data is the placeholder.</p>
                 </div>
             </div>
 
@@ -2004,19 +2024,15 @@
                 <p style="margin-bottom: 1rem;">Transparency is important. Here's what this tool is <span class="highlight-coral">not</span>:</p>
                 <div class="finding-card" style="margin-bottom: 1rem; border-left-color: var(--accent-coral);">
                     <h4>🚫 Not a Medical Diagnostic Tool</h4>
-                    <p>GutMind Explorer is for <strong>education and exploration only</strong>. Predictions are based on synthetic data and should never replace professional medical advice, diagnosis, or treatment.</p>
-                </div>
-                <div class="finding-card" style="margin-bottom: 1rem; border-left-color: var(--accent-coral);">
-                    <h4>🔢 Synthetic Data</h4>
-                    <p>The default dataset contains no real patient data. While correlation <em>patterns</em> reflect published research, the individual data points are computationally generated. Exact correlation coefficients shown in charts are artifacts of the simulation.</p>
+                    <p>GutMind Explorer is for <strong>education and exploration only</strong>. Predictions should never replace professional medical advice, diagnosis, or treatment.</p>
                 </div>
                 <div class="finding-card" style="margin-bottom: 1rem; border-left-color: var(--accent-coral);">
                     <h4>🧪 Research Is Evolving</h4>
                     <p>The gut-brain axis is an active area of study. Many associations are correlational, not causal. Effect sizes vary across populations, diets, and methodologies. New papers may update or contradict current findings.</p>
                 </div>
                 <div class="finding-card" style="border-left-color: var(--accent-coral);">
-                    <h4>📉 Model Trained on Simulated Data</h4>
-                    <p>The ML model learns patterns from synthetic data, so its predictions reflect those simulated patterns — not clinical validation on real patient cohorts. A production tool would require IRB-approved clinical datasets.</p>
+                    <h4>📊 Correlation ≠ Causation</h4>
+                    <p>Even in the real studies, lower Coprococcus in depressed patients doesn't prove the bacteria <em>caused</em> better mental health. The relationship could be reversed, or both could be driven by a third factor like diet.</p>
                 </div>
             </div>
 
