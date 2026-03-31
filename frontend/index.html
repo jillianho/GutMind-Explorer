@@ -1267,6 +1267,7 @@
             <button class="nav-btn" data-view="clusters">Clusters</button>
             <button class="nav-btn" data-view="myprofile">My Profile</button>
             <button class="nav-btn" data-view="simulator">Simulator</button>
+            <button class="nav-btn" data-view="about">About</button>
         </nav>
     </header>
 
@@ -1942,6 +1943,111 @@
                 </div>
             </div>
         </section>
+
+        <!-- About Dashboard -->
+        <section class="dashboard" id="aboutDashboard">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">About GutMind Explorer</h2>
+                    <p class="section-subtitle">Purpose, methodology, and limitations</p>
+                </div>
+            </div>
+
+            <div class="info-panel" style="background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(45, 212, 191, 0.08) 100%);">
+                <h3>🎯 What This Platform Does</h3>
+                <p>GutMind Explorer is an <span class="highlight">interactive educational tool</span> that makes cutting-edge microbiome-mental health research accessible and explorable. Instead of reading dense academic papers, users can visually explore the relationships between gut bacteria and mental health outcomes through interactive charts, ML predictions, and real-time simulations.</p>
+                <div class="info-grid" style="margin-top: 1.5rem;">
+                    <div class="info-item">
+                        <h4>📊 Explore Research Patterns</h4>
+                        <p>Visualize correlations, clusters, and distributions from data modeled on findings published in <strong>Nature Microbiology</strong>, <strong>Nature Communications</strong>, and other peer-reviewed journals.</p>
+                    </div>
+                    <div class="info-item">
+                        <h4>🤖 ML-Powered Predictions</h4>
+                        <p>Enter your gut bacteria levels and receive an anxiety risk assessment from a real ensemble model (Random Forest + Gradient Boosting) — the same techniques used in research.</p>
+                    </div>
+                    <div class="info-item">
+                        <h4>🎮 Simulate Interventions</h4>
+                        <p>Adjust bacteria levels with sliders and watch risk scores update in real-time. See how dietary changes that shift specific bacteria could affect mental health markers.</p>
+                    </div>
+                    <div class="info-item">
+                        <h4>📁 Bring Your Own Data</h4>
+                        <p>Upload results from commercial microbiome tests (Viome, Thryve, etc.) to get a personalized profile comparison against research-based population data.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel" style="background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(167, 139, 250, 0.08) 100%);">
+                <h3>🔬 Our Methodology</h3>
+                <p>The data and correlations in GutMind Explorer are grounded in peer-reviewed science:</p>
+                <div class="info-grid" style="margin-top: 1.5rem;">
+                    <div class="info-item">
+                        <h4>Research Foundation</h4>
+                        <p>Bacteria-mental health associations are parameterized from four key studies: <strong>Valles-Colomer et al. (2019)</strong> on gut neuroactive potential, <strong>Radjabzadeh et al. (2022)</strong> on microbiome-wide depression associations, <strong>Jiang et al. (2015)</strong> on MDD microbiota, and <strong>Simpson et al. (2021)</strong> meta-analysis.</p>
+                    </div>
+                    <div class="info-item">
+                        <h4>Synthetic Data Model</h4>
+                        <p>500 samples are generated with research-derived effect sizes — e.g., Coprococcus depleted in depression (effect: −0.40), Eggerthella enriched (effect: +0.35). Correlation <em>directions</em> are real; exact values are simulated.</p>
+                    </div>
+                    <div class="info-item">
+                        <h4>Clinical Scales</h4>
+                        <p>Mental health scores use validated clinical instruments: <strong>GAD-7</strong> (0–21) for anxiety and <strong>PHQ-9</strong> (0–27) for depression, with standard severity cutoffs.</p>
+                    </div>
+                    <div class="info-item">
+                        <h4>ML Pipeline</h4>
+                        <p>The prediction model is a real scikit-learn ensemble with cross-validated AUC-ROC, feature importance ranking, and proper train/test splits — not a toy calculation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>⚠️ Important Limitations</h3>
+                <p style="margin-bottom: 1rem;">Transparency is important. Here's what this tool is <span class="highlight-coral">not</span>:</p>
+                <div class="finding-card" style="margin-bottom: 1rem; border-left-color: var(--accent-coral);">
+                    <h4>🚫 Not a Medical Diagnostic Tool</h4>
+                    <p>GutMind Explorer is for <strong>education and exploration only</strong>. Predictions are based on synthetic data and should never replace professional medical advice, diagnosis, or treatment.</p>
+                </div>
+                <div class="finding-card" style="margin-bottom: 1rem; border-left-color: var(--accent-coral);">
+                    <h4>🔢 Synthetic Data</h4>
+                    <p>The default dataset contains no real patient data. While correlation <em>patterns</em> reflect published research, the individual data points are computationally generated. Exact correlation coefficients shown in charts are artifacts of the simulation.</p>
+                </div>
+                <div class="finding-card" style="margin-bottom: 1rem; border-left-color: var(--accent-coral);">
+                    <h4>🧪 Research Is Evolving</h4>
+                    <p>The gut-brain axis is an active area of study. Many associations are correlational, not causal. Effect sizes vary across populations, diets, and methodologies. New papers may update or contradict current findings.</p>
+                </div>
+                <div class="finding-card" style="border-left-color: var(--accent-coral);">
+                    <h4>📉 Model Trained on Simulated Data</h4>
+                    <p>The ML model learns patterns from synthetic data, so its predictions reflect those simulated patterns — not clinical validation on real patient cohorts. A production tool would require IRB-approved clinical datasets.</p>
+                </div>
+            </div>
+
+            <div class="info-panel" style="background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(45, 212, 191, 0.05) 100%);">
+                <h3>🚀 Where This Could Go</h3>
+                <p>As a prototype, GutMind Explorer demonstrates the potential for accessible microbiome-mental health tools:</p>
+                <div class="info-grid" style="margin-top: 1rem;">
+                    <div class="info-item">
+                        <h4>Real Data Integration</h4>
+                        <p>Partner with microbiome testing companies or research institutions to train on real, anonymized clinical datasets.</p>
+                    </div>
+                    <div class="info-item">
+                        <h4>API Auto-Import</h4>
+                        <p>Connect directly to test kit APIs so users can import their microbiome results with one click instead of manual entry.</p>
+                    </div>
+                    <div class="info-item">
+                        <h4>Longitudinal Tracking</h4>
+                        <p>Let users track their microbiome over time and see how dietary or lifestyle changes affect their gut-brain profile.</p>
+                    </div>
+                    <div class="info-item">
+                        <h4>Clinical Validation</h4>
+                        <p>With proper IRB approval and clinical partnerships, validate the ML model against real patient outcomes.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; padding: 2rem 0; color: var(--text-muted); font-size: 0.85rem;">
+                <p>Built with FastAPI, scikit-learn, and Chart.js</p>
+                <p style="margin-top: 0.5rem;">This tool is for educational purposes only. It is not intended to diagnose, treat, cure, or prevent any disease.</p>
+            </div>
+        </section>
     </main>
 
     <script>
@@ -2332,6 +2438,10 @@
             const dashboard = document.getElementById(`${view}Dashboard`);
             if (dashboard) {
                 dashboard.classList.add('active');
+            }
+            // About and Learn pages don't require data — auto-load if needed
+            if ((view === 'about' || view === 'learn') && !appData) {
+                document.getElementById('welcomeSection').style.display = 'none';
             }
         }
 
