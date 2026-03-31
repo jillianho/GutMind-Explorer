@@ -425,6 +425,10 @@ def generate_research_based_dataset(n_samples: int = 500, random_seed: int = 42)
     data["depression_score"] = depression_score
     data["anxiety_score"] = anxiety_score
     
+    # Step 4: Generate demographics
+    data["age"] = np.clip(np.round(np.random.normal(45, 15, n_samples)), 18, 85).astype(int)
+    data["sex"] = np.random.choice(["M", "F"], n_samples)
+    
     # Categorical levels based on clinical cutoffs
     # PHQ-9: 0-4 minimal, 5-9 mild, 10-14 moderate, 15-19 moderately severe, 20-27 severe
     data["depression_level"] = pd.cut(
@@ -459,7 +463,7 @@ def get_research_dataset() -> pd.DataFrame:
 def get_bacteria_columns(df: pd.DataFrame) -> List[str]:
     """Get list of bacteria column names."""
     exclude = ['sample_id', 'depression_score', 'anxiety_score', 
-               'depression_level', 'anxiety_level']
+               'depression_level', 'anxiety_level', 'age', 'sex']
     return [col for col in df.columns if col not in exclude]
 
 

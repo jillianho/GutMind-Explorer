@@ -1293,6 +1293,7 @@
                 <div>
                     <h3 id="datasetName">Demo Dataset</h3>
                     <p id="datasetInfo">50 subjects • 25 bacteria species • Anxiety & Depression scores</p>
+                    <p id="datasetDisclaimer" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">⚗️ Default dataset is simulated based on published research (not real patient data). Upload your own data for personal analysis.</p>
                 </div>
             </div>
             <button class="btn btn-secondary" onclick="resetData()">
@@ -2234,6 +2235,8 @@
                         appData = parseCSV(e.target.result);
                     }
                     initializeDashboard();
+                    document.getElementById('datasetName').textContent = file.name;
+                    document.getElementById('datasetDisclaimer').style.display = 'none';
                 } catch (error) {
                     alert('Error parsing file. Using demo data instead.');
                     loadDemoData();
@@ -2296,9 +2299,11 @@
             document.getElementById('avgDepression').textContent = 
                 mean(appData.subjects.map(s => s.depressionScore)).toFixed(1);
             
-            // Update info panel
-            document.getElementById('infoSubjects').textContent = appData.subjects.length;
-            document.getElementById('infoBacteria').textContent = appData.bacteria.length;
+            // Update info panel (elements may not exist in all views)
+            const infoSubjects = document.getElementById('infoSubjects');
+            const infoBacteria = document.getElementById('infoBacteria');
+            if (infoSubjects) infoSubjects.textContent = appData.subjects.length;
+            if (infoBacteria) infoBacteria.textContent = appData.bacteria.length;
             
             // Show overview
             showDashboard('overview');
@@ -2339,8 +2344,14 @@
             const anxietyScores = appData.subjects.map(s => s.anxietyScore);
             const depressionScores = appData.subjects.map(s => s.depressionScore);
             
-            // Create histogram bins
-            const bins = [0, 20, 40, 60, 80, 100];
+            // Create dynamic histogram bins based on actual data range
+            const allScores = [...anxietyScores, ...depressionScores];
+            const maxScore = Math.max(...allScores);
+            const numBins = 5;
+            const binSize = Math.ceil((maxScore + 1) / numBins);
+            const bins = Array.from({length: numBins + 1}, (_, i) => i * binSize);
+            const binLabels = bins.slice(0, -1).map((b, i) => `${b}-${bins[i+1]}`);
+            
             const anxietyHist = bins.slice(0, -1).map((_, i) => 
                 anxietyScores.filter(s => s >= bins[i] && s < bins[i+1]).length
             );
@@ -2351,7 +2362,7 @@
             charts.mentalHealth = new Chart(ctx1, {
                 type: 'bar',
                 data: {
-                    labels: ['0-20', '20-40', '40-60', '60-80', '80-100'],
+                    labels: binLabels,
                     datasets: [
                         {
                             label: 'Anxiety',

@@ -127,12 +127,12 @@ async def get_dataset_info():
         "anxiety_distribution": {
             "mean": round(float(df['anxiety_score'].mean()), 1),
             "std": round(float(df['anxiety_score'].std()), 1),
-            "pct_high": round(float((df['anxiety_level'] == 'high').mean() * 100), 1)
+            "pct_high": round(float(df['anxiety_level'].isin(['moderate', 'severe']).mean() * 100), 1)
         },
         "depression_distribution": {
             "mean": round(float(df['depression_score'].mean()), 1),
             "std": round(float(df['depression_score'].std()), 1),
-            "pct_high": round(float((df['depression_level'] == 'high').mean() * 100), 1)
+            "pct_high": round(float(df['depression_level'].isin(['moderate', 'moderately_severe', 'severe']).mean() * 100), 1)
         }
     }
 
@@ -356,18 +356,7 @@ async def global_exception_handler(request, exc):
     )
 
 
-# ============== Serve Frontend ==============
-
-# Serve the frontend HTML
-@app.get("/app")
-async def serve_frontend():
-    frontend_path = Path(__file__).parent.parent / "frontend" / "index.html"
-    if frontend_path.exists():
-        return FileResponse(frontend_path)
-    return {"error": "Frontend not found"}
-
-
-# ============== Run Server ==============
+# ============== Run Server ==
 
 if __name__ == "__main__":
     import uvicorn

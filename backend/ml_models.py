@@ -346,8 +346,8 @@ class MicrobiomeAnalyzer:
             stats_dict = {
                 'cluster': i,
                 'size': int(mask.sum()),
-                'pct_high_anxiety': round(float((cluster_df['anxiety_level'] == 'high').mean() * 100), 1) if 'anxiety_level' in df.columns else None,
-                'pct_high_depression': round(float((cluster_df['depression_level'] == 'high').mean() * 100), 1) if 'depression_level' in df.columns else None,
+                'pct_high_anxiety': round(float(cluster_df['anxiety_level'].isin(['moderate', 'severe']).mean() * 100), 1) if 'anxiety_level' in df.columns else None,
+                'pct_high_depression': round(float(cluster_df['depression_level'].isin(['moderate', 'moderately_severe', 'severe']).mean() * 100), 1) if 'depression_level' in df.columns else None,
                 'mean_anxiety': round(float(cluster_df['anxiety_score'].mean()), 1) if 'anxiety_score' in df.columns else None,
             }
             
